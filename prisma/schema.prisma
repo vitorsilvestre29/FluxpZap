@@ -1,0 +1,288 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  SUPER_ADMIN
+  AGENCY_ADMIN
+  AGENCY_MEMBER
+}
+
+enum UserStatus {
+  PENDING
+  ACTIVE
+  SUSPENDED
+}
+
+enum AgencyStatus {
+  ACTIVE
+  SUSPENDED
+}
+
+enum AgencyPlan {
+  STARTER
+  GROWTH
+  SCALE
+}
+
+enum ClientStatus {
+  ACTIVE
+  PAUSED
+  ARCHIVED
+}
+
+enum InstanceStatus {
+  PENDING
+  QR_READY
+  CONNECTED
+  DISCONNECTED
+  ERROR
+}
+
+enum FlowStatus {
+  DRAFT
+  READY
+  PUBLISHED
+  PAUSED
+}
+
+enum BotProvider {
+  EVOLUTION_BOT
+  TYPEBOT
+}
+
+enum LinkStatus {
+  ACTIVE
+  PAUSED
+}
+
+enum BotSessionStatus {
+  OPEN
+  CLOSED
+  ERROR
+}
+
+enum IntegrationType {
+  EVOLUTION
+  EVOLUTION_BOT
+  TYPEBOT
+}
+
+model User {
+  id                String                @id @default(cuid())
+  email             String                @unique
+  passwordHash      String
+  name              String?
+  role              UserRole              @default(AGENCY_ADMIN)
+  status            UserStatus            @default(PENDING)
+  agencyId          String?
+  agency            Agency?               @relation(fields: [agencyId], references: [id])
+  emailVerifiedAt   DateTime?
+  createdAt         DateTime              @default(now())
+  updatedAt         DateTime              @updatedAt
+  sessions          Session[]
+  verificationTokens VerificationToken[]
+  passwordResetTokens PasswordResetToken[]
+  ownedAgencies     Agency[]              @relation("AgencyOwner")
+
+  @@index([agencyId])
+}
+
+model Agency {
+  id        String            @id @default(cuid())
+  name      String
+  slug      String            @unique
+  status    AgencyStatus      @default(ACTIVE)
+  plan      AgencyPlan        @default(STARTER)
+  maxClients Int              @default(10)
+  maxInstances Int            @default(10)
+  billingEmail String?
+  brandName String?
+  brandLogoUrl String?
+  primaryColor String?
+  trialEndsAt DateTime?
+  ownerId   String?
+  owner     User?             @relation("AgencyOwner", fields: [ownerId], references: [id])
+  users     User[]
+  clients   Client[]
+  flows     TypebotFlow[]
+  instances EvolutionInstance[]
+  integrations AgencyIntegration[]
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+
+  @@index([ownerId])
+}
+
+model Client {
+  id           String            @id @default(cuid())
+  agencyId     String
+  agency       Agency            @relation(fields: [agencyId], references: [id])
+  name         String
+  status       ClientStatus      @default(ACTIVE)
+  whatsappNumber String?
+  contactName  String?
+  contactEmail String?
+  contactPhone String?
+  notes        String?
+  instances    EvolutionInstance[]
+  links        ClientFlowLink[]
+  botSessions  BotSession[]
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+
+  @@unique([agencyId, whatsappNumber])
+  @@index([agencyId])
+}
+
+model AgencyIntegration {
+  id        String           @id @default(cuid())
+  agencyId  String
+  agency    Agency           @relation(fields: [agencyId], references: [id])
+  type      IntegrationType
+  name      String?
+  baseUrl   String
+  apiKey    String?
+  metadata  Json?
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+
+  @@unique([agencyId, type])
+  @@index([agencyId])
+}
+
+model EvolutionInstance {
+  id           String         @id @default(cuid())
+  agencyId     String
+  clientId     String
+  agency       Agency         @relation(fields: [agencyId], references: [id])
+  client       Client         @relation(fields: [clientId], references: [id])
+  instanceName String
+  status       InstanceStatus @default(PENDING)
+  lastQrCode   String?
+  metadata     Json?
+  links        ClientFlowLink[]
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  @@unique([agencyId, instanceName])
+  @@unique([clientId])
+  @@index([clientId])
+}
+
+model TypebotFlow {
+  id                String      @id @default(cuid())
+  agencyId          String
+  agency            Agency      @relation(fields: [agencyId], references: [id])
+  name              String
+  description       String?
+  status            FlowStatus  @default(DRAFT)
+  provider          BotProvider  @default(TYPEBOT)
+  typebotId         String?
+  typebotWorkspaceId String?
+  editorUrl         String?
+  publishedUrl      String?
+  evolutionBotId    String?
+  evolutionBotApiUrl String?
+  evolutionBotApiKey String?
+  triggerType       String      @default("all")
+  triggerOperator   String?
+  triggerValue      String?
+  keepOpen          Boolean     @default(false)
+  stopBotFromMe     Boolean     @default(true)
+  listeningFromMe   Boolean     @default(false)
+  debounceTime      Int         @default(1)
+  delayMessage      Int         @default(1000)
+  unknownMessage    String      @default("Nao entendi. Pode reformular?")
+  keywordFinish     String      @default("#sair")
+  expire            Int         @default(300)
+  splitMessages     Boolean     @default(true)
+  timePerChar       Int         @default(35)
+  links             ClientFlowLink[]
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+
+  @@index([agencyId])
+}
+
+model ClientFlowLink {
+  id         String     @id @default(cuid())
+  clientId   String
+  flowId     String
+  instanceId String
+  client     Client     @relation(fields: [clientId], references: [id])
+  flow       TypebotFlow @relation(fields: [flowId], references: [id])
+  instance   EvolutionInstance @relation(fields: [instanceId], references: [id])
+  status     LinkStatus @default(ACTIVE)
+  sessions   BotSession[]
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+
+  @@unique([clientId, flowId])
+  @@index([instanceId])
+}
+
+model BotSession {
+  id             String           @id @default(cuid())
+  agencyId       String
+  clientId       String
+  linkId         String?
+  remoteJid      String?
+  pushName       String?
+  status         BotSessionStatus @default(OPEN)
+  lastMessageAt  DateTime?
+  messageCount   Int              @default(0)
+  metadata       Json?
+  client         Client           @relation(fields: [clientId], references: [id])
+  link           ClientFlowLink?  @relation(fields: [linkId], references: [id])
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+
+  @@index([agencyId])
+  @@index([clientId])
+  @@index([linkId])
+  @@index([remoteJid])
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  tokenHash String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+model VerificationToken {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  tokenHash String
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  tokenHash String
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([expiresAt])
+}

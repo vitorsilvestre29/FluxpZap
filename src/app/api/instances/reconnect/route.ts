@@ -1,0 +1,51 @@
+import { Prisma } from '@prisma/client';
+import { NextResponse } from 'next/server';
+
+import { requireUser } from '@/server/auth/context';
+import { getInstanceForAgency, updateInstanceState } from '@/server/data/instances';
+import {
+  connectEvolutionInstance,
+  mapEvolutionStateToInstanceStatus,
+  restartEvolutionInstance,
+} from '@/server/integrations/evolution';
+import { getIntegration } from '@/server/integrations/integration.service';
+import { formDataToObject } from '@/server/utils/form';
+
+export async function POST(request: Request) {
+  const user = await requireUser();
+  if (!user.agencyId) {
+    return NextResponse.redirect(new URL('/dashboard/instances?error=Sem%20agencia', request.url));
+  }
+
+  const data = formDataToObject(await request.formData());
+  const instance = data.instanceId ? await getInstanceForAgency(user.agencyId, data.instanceId) : null;
+  if (!instance) {
+    return NextResponse.redirect(new URL('/dashboard/instances?error=Instancia%20invalida', request.url));
+  }
+
+  const integration = await getIntegration(user.agencyId, 'EVOLUTION');
+  const baseUrl = integration?.baseUrl || process.env.EVOLUTION_BASE_URL || '';
+  const apiKey = integration?.apiKey || process.env.EVOLUTION_API_KEY || '';
+
+  if (!baseUrl || !apiKey) {
+    return NextResponse.redirect(new URL('/dashboard/instances?error=Configure%20Evolution', request.url));
+  }
+
+  try {
+    const response =
+      data.mode === 'restart'
+        ? await restartEvolutionInstance({ baseUrl, apiKey }, instance.instanceName)
+        : await connectEvolutionInstance({ baseUrl, apiKey }, instance.instanceName);
+    const qrCode = response?.base64 || response?.qrcode?.base64 || instance.lastQrCode;
+    const state = response?.instance?.state || response?.state;
+    await updateInstanceState(user.agencyId, instance.id, {
+      status: qrCode ? 'QR_READY' : mapEvolutionStateToInstanceStatus(state),
+      lastQrCode: qrCode,
+      metadata: response as Prisma.InputJsonValue,
+    });
+  } catch {
+    await updateInstanceState(user.agencyId, instance.id, { status: 'ERROR' });
+  }
+
+  return NextResponse.redirect(new URL('/dashboard/instances', request.url));
+}
