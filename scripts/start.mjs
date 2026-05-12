@@ -12,6 +12,11 @@ function run(command, args) {
 }
 
 run('npx', ['prisma', 'migrate', 'deploy']);
+
+if (process.env.ADMIN_EMAIL && process.env.ADMIN_PASSWORD) {
+  run('npm', ['run', 'admin:create']);
+}
+
 run('npx', [
   'next',
   'start',
