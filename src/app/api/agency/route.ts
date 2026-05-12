@@ -3,11 +3,12 @@ import { NextResponse } from 'next/server';
 import { requireUser } from '@/server/auth/context';
 import { updateAgencyProfile } from '@/server/data/agency';
 import { formDataToObject } from '@/server/utils/form';
+import { redirectUrl } from '@/server/utils/url';
 
 export async function POST(request: Request) {
   const user = await requireUser();
   if (!user.agencyId) {
-    return NextResponse.redirect(new URL('/dashboard/settings?error=Sem%20agencia', request.url));
+    return NextResponse.redirect(redirectUrl('/dashboard/settings?error=Sem%20agencia', request));
   }
 
   const data = formDataToObject(await request.formData());
@@ -20,5 +21,5 @@ export async function POST(request: Request) {
     primaryColor: data.primaryColor,
   });
 
-  return NextResponse.redirect(new URL('/dashboard/settings', request.url));
+  return NextResponse.redirect(redirectUrl('/dashboard/settings', request));
 }

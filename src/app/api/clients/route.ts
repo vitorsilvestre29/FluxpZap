@@ -4,11 +4,12 @@ import { requireUser } from '@/server/auth/context';
 import { getAgencyUsage } from '@/server/data/agency';
 import { createClient, updateClient } from '@/server/data/clients';
 import { formDataToObject } from '@/server/utils/form';
+import { redirectUrl } from '@/server/utils/url';
 
 export async function POST(request: Request) {
   const user = await requireUser();
   if (!user.agencyId) {
-    return NextResponse.redirect(new URL('/dashboard/clients?error=Sem%20agencia', request.url));
+    return NextResponse.redirect(redirectUrl('/dashboard/clients?error=Sem%20agencia', request));
   }
 
   const formData = await request.formData();
@@ -28,7 +29,7 @@ export async function POST(request: Request) {
     } else {
       const usage = await getAgencyUsage(user.agencyId);
       if (usage.agency && usage.clients >= usage.agency.maxClients) {
-        return NextResponse.redirect(new URL('/dashboard/clients?error=Limite%20de%20clientes%20atingido', request.url));
+        return NextResponse.redirect(redirectUrl('/dashboard/clients?error=Limite%20de%20clientes%20atingido', request));
       }
 
       await createClient(user.agencyId, {
@@ -41,8 +42,8 @@ export async function POST(request: Request) {
       });
     }
   } catch {
-    return NextResponse.redirect(new URL('/dashboard/clients?error=Numero%20ja%20cadastrado', request.url));
+    return NextResponse.redirect(redirectUrl('/dashboard/clients?error=Numero%20ja%20cadastrado', request));
   }
 
-  return NextResponse.redirect(new URL('/dashboard/clients', request.url));
+  return NextResponse.redirect(redirectUrl('/dashboard/clients', request));
 }

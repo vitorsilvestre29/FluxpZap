@@ -10,17 +10,18 @@ import {
 } from '@/server/integrations/evolution';
 import { getIntegration } from '@/server/integrations/integration.service';
 import { formDataToObject } from '@/server/utils/form';
+import { redirectUrl } from '@/server/utils/url';
 
 export async function POST(request: Request) {
   const user = await requireUser();
   if (!user.agencyId) {
-    return NextResponse.redirect(new URL('/dashboard/instances?error=Sem%20agencia', request.url));
+    return NextResponse.redirect(redirectUrl('/dashboard/instances?error=Sem%20agencia', request));
   }
 
   const data = formDataToObject(await request.formData());
   const instance = data.instanceId ? await getInstanceForAgency(user.agencyId, data.instanceId) : null;
   if (!instance) {
-    return NextResponse.redirect(new URL('/dashboard/instances?error=Instancia%20invalida', request.url));
+    return NextResponse.redirect(redirectUrl('/dashboard/instances?error=Instancia%20invalida', request));
   }
 
   const integration = await getIntegration(user.agencyId, 'EVOLUTION');
@@ -28,7 +29,7 @@ export async function POST(request: Request) {
   const apiKey = integration?.apiKey || process.env.EVOLUTION_API_KEY || '';
 
   if (!baseUrl || !apiKey) {
-    return NextResponse.redirect(new URL('/dashboard/instances?error=Configure%20Evolution', request.url));
+    return NextResponse.redirect(redirectUrl('/dashboard/instances?error=Configure%20Evolution', request));
   }
 
   try {
@@ -47,5 +48,5 @@ export async function POST(request: Request) {
     await updateInstanceState(user.agencyId, instance.id, { status: 'ERROR' });
   }
 
-  return NextResponse.redirect(new URL('/dashboard/instances', request.url));
+  return NextResponse.redirect(redirectUrl('/dashboard/instances', request));
 }

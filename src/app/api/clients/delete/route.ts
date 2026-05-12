@@ -3,11 +3,12 @@ import { NextResponse } from 'next/server';
 import { requireUser } from '@/server/auth/context';
 import { deleteClient } from '@/server/data/clients';
 import { formDataToObject } from '@/server/utils/form';
+import { redirectUrl } from '@/server/utils/url';
 
 export async function POST(request: Request) {
   const user = await requireUser();
   if (!user.agencyId) {
-    return NextResponse.redirect(new URL('/dashboard/clients?error=Sem%20agencia', request.url));
+    return NextResponse.redirect(redirectUrl('/dashboard/clients?error=Sem%20agencia', request));
   }
 
   const formData = await request.formData();
@@ -17,5 +18,5 @@ export async function POST(request: Request) {
     await deleteClient(user.agencyId, data.clientId);
   }
 
-  return NextResponse.redirect(new URL('/dashboard/clients', request.url));
+  return NextResponse.redirect(redirectUrl('/dashboard/clients', request));
 }

@@ -7,11 +7,12 @@ import { createEvolutionInstance } from '@/server/integrations/evolution';
 import { getIntegration } from '@/server/integrations/integration.service';
 import { clientHasInstance, createInstanceRecord } from '@/server/data/instances';
 import { formDataToObject } from '@/server/utils/form';
+import { redirectUrl } from '@/server/utils/url';
 
 export async function POST(request: Request) {
   const user = await requireUser();
   if (!user.agencyId) {
-    return NextResponse.redirect(new URL('/dashboard/instances?error=Sem%20agencia', request.url));
+    return NextResponse.redirect(redirectUrl('/dashboard/instances?error=Sem%20agencia', request));
   }
 
   const formData = await request.formData();
@@ -19,16 +20,16 @@ export async function POST(request: Request) {
 
   const client = await getClientForAgency(user.agencyId, data.clientId);
   if (!client) {
-    return NextResponse.redirect(new URL('/dashboard/instances?error=Cliente%20invalido', request.url));
+    return NextResponse.redirect(redirectUrl('/dashboard/instances?error=Cliente%20invalido', request));
   }
 
   if (await clientHasInstance(user.agencyId, data.clientId)) {
-    return NextResponse.redirect(new URL('/dashboard/instances?error=Cliente%20ja%20tem%20WhatsApp', request.url));
+    return NextResponse.redirect(redirectUrl('/dashboard/instances?error=Cliente%20ja%20tem%20WhatsApp', request));
   }
 
   const usage = await getAgencyUsage(user.agencyId);
   if (usage.agency && usage.instances >= usage.agency.maxInstances) {
-    return NextResponse.redirect(new URL('/dashboard/instances?error=Limite%20de%20instancias%20atingido', request.url));
+    return NextResponse.redirect(redirectUrl('/dashboard/instances?error=Limite%20de%20instancias%20atingido', request));
   }
 
   const integration = await getIntegration(user.agencyId, 'EVOLUTION');
@@ -36,7 +37,7 @@ export async function POST(request: Request) {
   const apiKey = integration?.apiKey || process.env.EVOLUTION_API_KEY || '';
 
   if (!baseUrl || !apiKey) {
-    return NextResponse.redirect(new URL('/dashboard/instances?error=Configure%20Evolution', request.url));
+    return NextResponse.redirect(redirectUrl('/dashboard/instances?error=Configure%20Evolution', request));
   }
 
   const response = await createEvolutionInstance(
@@ -58,5 +59,5 @@ export async function POST(request: Request) {
     metadata: response as Record<string, unknown>,
   });
 
-  return NextResponse.redirect(new URL('/dashboard/instances', request.url));
+  return NextResponse.redirect(redirectUrl('/dashboard/instances', request));
 }
