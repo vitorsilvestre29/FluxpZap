@@ -12,4 +12,11 @@ function run(command, args) {
 }
 
 run('npx', ['prisma', 'migrate', 'deploy']);
-run('npx', ['next', 'start', '--port', process.env.PORT || '3000']);
+run('npx', [
+  'next',
+  'start',
+  '--hostname',
+  process.env.HOSTNAME || '0.0.0.0',
+  '--port',
+  process.env.PORT || '3000',
+]);
