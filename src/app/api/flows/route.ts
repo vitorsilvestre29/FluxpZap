@@ -23,6 +23,7 @@ export async function POST(request: Request) {
       description: data.description,
       provider,
       typebotId: data.typebotId,
+      typebotPublicId: data.typebotPublicId,
       typebotWorkspaceId: data.typebotWorkspaceId,
       editorUrl: data.editorUrl,
       publishedUrl: data.publishedUrl,
@@ -49,6 +50,7 @@ export async function POST(request: Request) {
   } else {
     let typebotData: {
       typebotId?: string | null;
+      typebotPublicId?: string | null;
       typebotWorkspaceId?: string | null;
       editorUrl?: string | null;
       publishedUrl?: string | null;
@@ -69,6 +71,7 @@ export async function POST(request: Request) {
         if (created.ok) {
           typebotData = {
             typebotId: created.typebotId,
+            typebotPublicId: created.publicId,
             typebotWorkspaceId: typebotConfig.workspaceId,
             editorUrl: created.editorUrl,
             publishedUrl: created.publishedUrl,
@@ -84,6 +87,7 @@ export async function POST(request: Request) {
       description: data.description,
       provider,
       typebotId: typebotData.typebotId || data.typebotId,
+      typebotPublicId: typebotData.typebotPublicId || data.typebotPublicId,
       typebotWorkspaceId: typebotData.typebotWorkspaceId || data.typebotWorkspaceId,
       editorUrl: typebotData.editorUrl || data.editorUrl,
       publishedUrl: typebotData.publishedUrl || data.publishedUrl,

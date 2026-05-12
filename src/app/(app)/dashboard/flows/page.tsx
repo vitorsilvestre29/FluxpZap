@@ -123,6 +123,7 @@ export default async function FlowsPage({ searchParams }: PageProps) {
                 <input type="hidden" name="flowId" value={flow.id} />
                 <input type="hidden" name="provider" value={flow.provider} />
                 <input type="hidden" name="typebotId" value={flow.typebotId ?? ''} />
+                <input type="hidden" name="typebotPublicId" value={flow.typebotPublicId ?? ''} />
                 <input type="hidden" name="typebotWorkspaceId" value={flow.typebotWorkspaceId ?? ''} />
                 <input type="hidden" name="editorUrl" value={flow.editorUrl ?? ''} />
                 <input type="hidden" name="publishedUrl" value={flow.publishedUrl ?? ''} />

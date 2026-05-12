@@ -46,7 +46,7 @@ x-fluxozap-secret: seu-segredo
 5. Agencia configura Evolution e o motor do Construtor Fluxozap em `/dashboard/settings/integrations`.
 6. Agencia cadastra clientes e cria fluxos no construtor visual embutido.
 7. Agencia cria o vinculo cliente + fluxo + instancia.
-8. Para API propria, agencia clica em `Provisionar bot` para criar/atualizar o bot dentro da Evolution API.
+8. Agencia clica em `Publicar no WhatsApp` para configurar o bot na Evolution API.
 
 ## Checklist de entrega para cliente da agencia
 
@@ -72,6 +72,11 @@ Para mascarar melhor:
 Com essas variaveis configuradas, a tela `/dashboard/flows` cria o bot no motor visual automaticamente e abre o editor dentro do Fluxozap pelo botao `Abrir construtor`. Sem essas variaveis, o fluxo ainda e salvo como rascunho, mas o editor fica pendente ate a integracao ser concluida.
 
 Fluxos criados antes da integracao podem ser ativados depois pelo botao `Preparar construtor`. Ao clicar em `Publicar`, o Fluxozap tambem chama a API de publicacao do motor visual antes de marcar o fluxo como publicado.
+
+Depois do fluxo visual estar pronto, a tela de vinculos usa a integracao nativa Typebot da Evolution API:
+
+- `POST /typebot/create/{instance}` para configurar o bot visual no WhatsApp.
+- `POST /typebot/update/{typebotId}/{instance}` quando ja existir uma configuracao registrada.
 
 Observacao honesta: nenhum iframe/proxy simples garante invisibilidade absoluta em DevTools. Para vender com marca propria, o ideal e usar Typebot self-hosted com dominio seu, remover marcas no tema/build quando necessario e servir o editor pelo proxy interno.
 

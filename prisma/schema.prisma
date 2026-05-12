@@ -184,6 +184,7 @@ model TypebotFlow {
   status            FlowStatus  @default(DRAFT)
   provider          BotProvider  @default(TYPEBOT)
   typebotId         String?
+  typebotPublicId   String?
   typebotWorkspaceId String?
   editorUrl         String?
   publishedUrl      String?

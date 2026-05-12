@@ -92,14 +92,12 @@ export default async function LinksPage({ searchParams }: PageProps) {
               <p className="text-xs uppercase tracking-[0.2em] text-slate-400">
                 {link.status} · {link.flow.provider} · {link.instance.instanceName}
               </p>
-              {link.flow.provider === 'EVOLUTION_BOT' && (
-                <form action="/api/links/deploy" method="post">
-                  <input type="hidden" name="linkId" value={link.id} />
-                  <button className="rounded-full border border-cyan-400/50 px-4 py-2 text-xs uppercase tracking-[0.2em] text-cyan-100">
-                    Provisionar bot
-                  </button>
-                </form>
-              )}
+              <form action="/api/links/deploy" method="post">
+                <input type="hidden" name="linkId" value={link.id} />
+                <button className="rounded-full border border-cyan-400/50 px-4 py-2 text-xs uppercase tracking-[0.2em] text-cyan-100">
+                  Publicar no WhatsApp
+                </button>
+              </form>
               <form action="/api/links/status" method="post">
                 <input type="hidden" name="linkId" value={link.id} />
                 <input type="hidden" name="status" value={link.status === 'ACTIVE' ? 'PAUSED' : 'ACTIVE'} />

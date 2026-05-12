@@ -25,6 +25,7 @@ export async function createFlow(
     description?: string;
     provider?: 'EVOLUTION_BOT' | 'TYPEBOT';
     typebotId?: string;
+    typebotPublicId?: string | null;
     typebotWorkspaceId?: string;
     editorUrl?: string;
     publishedUrl?: string;
@@ -40,6 +41,7 @@ export async function createFlow(
       description: data.description || null,
       provider: data.provider ?? 'TYPEBOT',
       typebotId: data.typebotId || null,
+      typebotPublicId: data.typebotPublicId || null,
       typebotWorkspaceId: data.typebotWorkspaceId || null,
       editorUrl: data.editorUrl || null,
       publishedUrl: data.publishedUrl || null,
@@ -57,6 +59,7 @@ export async function updateFlow(
     name: string;
     description?: string;
     typebotId?: string;
+    typebotPublicId?: string;
     typebotWorkspaceId?: string;
     editorUrl?: string;
     publishedUrl?: string;
@@ -86,6 +89,7 @@ export async function updateFlow(
       description: data.description || null,
       provider: data.provider,
       typebotId: data.typebotId || null,
+      typebotPublicId: data.typebotPublicId || null,
       typebotWorkspaceId: data.typebotWorkspaceId || null,
       editorUrl: data.editorUrl || null,
       publishedUrl: data.publishedUrl || null,
@@ -121,6 +125,7 @@ export async function setFlowTypebotProvisioning(
   flowId: string,
   data: {
     typebotId: string;
+    typebotPublicId?: string | null;
     typebotWorkspaceId?: string | null;
     editorUrl?: string | null;
     publishedUrl?: string | null;
@@ -130,6 +135,7 @@ export async function setFlowTypebotProvisioning(
     where: { id: flowId, agencyId },
     data: {
       typebotId: data.typebotId,
+      typebotPublicId: data.typebotPublicId || null,
       typebotWorkspaceId: data.typebotWorkspaceId || null,
       editorUrl: data.editorUrl || null,
       publishedUrl: data.publishedUrl || null,

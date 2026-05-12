@@ -46,6 +46,7 @@ export async function POST(request: Request) {
 
     await setFlowTypebotProvisioning(user.agencyId, flow.id, {
       typebotId: created.typebotId,
+      typebotPublicId: created.publicId,
       typebotWorkspaceId: config.workspaceId,
       editorUrl: created.editorUrl,
       publishedUrl: created.publishedUrl,

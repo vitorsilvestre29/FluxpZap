@@ -30,6 +30,23 @@ type EvolutionBotPayload = {
   timePerChar: number;
 };
 
+type EvolutionTypebotPayload = {
+  enabled: boolean;
+  url: string;
+  typebot: string;
+  triggerType: string;
+  triggerOperator?: string | null;
+  triggerValue?: string | null;
+  expire: number;
+  keywordFinish: string;
+  delayMessage: number;
+  unknownMessage: string;
+  listeningFromMe: boolean;
+  stopBotFromMe: boolean;
+  keepOpen: boolean;
+  debounceTime: number;
+};
+
 export async function createEvolutionInstance(config: EvolutionConfig, payload: EvolutionInstancePayload) {
   const response = await fetch(`${config.baseUrl}/instance/create`, {
     method: 'POST',
@@ -174,4 +191,70 @@ export async function updateEvolutionBot(
   }
 
   return response.json();
+}
+
+function buildEvolutionTypebotPayload(payload: EvolutionTypebotPayload) {
+  return {
+    enabled: payload.enabled,
+    url: payload.url.replace(/\/$/, ''),
+    typebot: payload.typebot,
+    triggerType: payload.triggerType || 'all',
+    triggerOperator: payload.triggerOperator || undefined,
+    triggerValue: payload.triggerValue || undefined,
+    expire: payload.expire,
+    keywordFinish: payload.keywordFinish,
+    delayMessage: payload.delayMessage,
+    unknownMessage: payload.unknownMessage,
+    listeningFromMe: payload.listeningFromMe,
+    stopBotFromMe: payload.stopBotFromMe,
+    keepOpen: payload.keepOpen,
+    debounceTime: payload.debounceTime,
+  };
+}
+
+export async function createEvolutionTypebot(
+  config: EvolutionConfig,
+  instanceName: string,
+  payload: EvolutionTypebotPayload,
+) {
+  const response = await fetch(`${config.baseUrl}/typebot/create/${instanceName}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      apikey: config.apiKey,
+    },
+    body: JSON.stringify(buildEvolutionTypebotPayload(payload)),
+    cache: 'no-store',
+  });
+
+  if (!response.ok) {
+    const message = await response.text();
+    throw new Error(message || 'Falha ao configurar Typebot na Evolution');
+  }
+
+  return response.json().catch(() => ({}));
+}
+
+export async function updateEvolutionTypebot(
+  config: EvolutionConfig,
+  instanceName: string,
+  evolutionTypebotId: string,
+  payload: EvolutionTypebotPayload,
+) {
+  const response = await fetch(`${config.baseUrl}/typebot/update/${evolutionTypebotId}/${instanceName}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      apikey: config.apiKey,
+    },
+    body: JSON.stringify(buildEvolutionTypebotPayload(payload)),
+    cache: 'no-store',
+  });
+
+  if (!response.ok) {
+    const message = await response.text();
+    throw new Error(message || 'Falha ao atualizar Typebot na Evolution');
+  }
+
+  return response.json().catch(() => ({}));
 }
