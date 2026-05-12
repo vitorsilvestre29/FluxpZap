@@ -3,7 +3,11 @@ import { redirect } from 'next/navigation';
 import { requireUser } from '@/server/auth/context';
 import { getAgencies } from '@/server/data/admin';
 
-export default async function AgenciesPage() {
+type PageProps = {
+  searchParams?: { error?: string };
+};
+
+export default async function AgenciesPage({ searchParams }: PageProps) {
   const user = await requireUser();
   if (user.role !== 'SUPER_ADMIN') {
     redirect('/dashboard');
@@ -17,6 +21,79 @@ export default async function AgenciesPage() {
         <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Admin</p>
         <h1 className="mt-3 text-2xl font-semibold text-white">Agencias</h1>
       </header>
+
+      <section className="panel rounded-3xl p-6">
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <h2 className="text-sm font-semibold text-white">Nova agencia</h2>
+            <p className="mt-1 text-sm text-slate-400">
+              Cadastre manualmente um cliente pagante e entregue o acesso inicial ao responsavel.
+            </p>
+          </div>
+        </div>
+        {searchParams?.error && (
+          <div className="mt-4 rounded-2xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-xs text-amber-200">
+            {searchParams.error}
+          </div>
+        )}
+        <form action="/api/admin/agencies" method="post" className="mt-5 grid gap-4 md:grid-cols-3">
+          <input type="hidden" name="action" value="create" />
+          <input
+            name="agencyName"
+            required
+            placeholder="Nome da agencia"
+            className="rounded-2xl border border-slate-800 bg-slate-950/70 px-4 py-3 text-sm text-slate-100"
+          />
+          <input
+            name="ownerName"
+            placeholder="Nome do responsavel"
+            className="rounded-2xl border border-slate-800 bg-slate-950/70 px-4 py-3 text-sm text-slate-100"
+          />
+          <input
+            name="ownerEmail"
+            required
+            type="email"
+            placeholder="Email de login"
+            className="rounded-2xl border border-slate-800 bg-slate-950/70 px-4 py-3 text-sm text-slate-100"
+          />
+          <input
+            name="ownerPassword"
+            required
+            minLength={8}
+            type="password"
+            placeholder="Senha inicial"
+            className="rounded-2xl border border-slate-800 bg-slate-950/70 px-4 py-3 text-sm text-slate-100"
+          />
+          <select
+            name="plan"
+            defaultValue="STARTER"
+            className="rounded-2xl border border-slate-800 bg-slate-950/70 px-4 py-3 text-sm text-slate-100"
+          >
+            <option value="STARTER">Starter</option>
+            <option value="GROWTH">Growth</option>
+            <option value="SCALE">Scale</option>
+          </select>
+          <div className="grid grid-cols-2 gap-3">
+            <input
+              name="maxClients"
+              type="number"
+              min={1}
+              defaultValue={10}
+              className="rounded-2xl border border-slate-800 bg-slate-950/70 px-4 py-3 text-sm text-slate-100"
+            />
+            <input
+              name="maxInstances"
+              type="number"
+              min={1}
+              defaultValue={10}
+              className="rounded-2xl border border-slate-800 bg-slate-950/70 px-4 py-3 text-sm text-slate-100"
+            />
+          </div>
+          <button className="md:col-span-3 rounded-full bg-cyan-400 px-4 py-3 text-sm font-semibold text-slate-900">
+            Criar agencia
+          </button>
+        </form>
+      </section>
 
       <section className="grid gap-4">
         {agencies.map((agency) => (

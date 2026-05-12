@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 
 import { getSessionUser } from '@/server/auth/session';
 import { approveUser, getPendingUsers } from '@/server/auth/user.service';
+import { redirectUrl } from '@/server/utils/url';
 
 export async function GET() {
   const user = await getSessionUser();
@@ -35,5 +36,5 @@ export async function POST(request: Request) {
   }
 
   await approveUser(userId);
-  return NextResponse.redirect(new URL('/dashboard/admin/approvals', request.url));
+  return NextResponse.redirect(redirectUrl('/dashboard/admin/approvals', request));
 }
