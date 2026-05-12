@@ -71,6 +71,8 @@ Para mascarar melhor:
 
 Com essas variaveis configuradas, a tela `/dashboard/flows` cria o bot no motor visual automaticamente e abre o editor dentro do Fluxozap pelo botao `Abrir construtor`. Sem essas variaveis, o fluxo ainda e salvo como rascunho, mas o editor fica pendente ate a integracao ser concluida.
 
+Fluxos criados antes da integracao podem ser ativados depois pelo botao `Preparar construtor`. Ao clicar em `Publicar`, o Fluxozap tambem chama a API de publicacao do motor visual antes de marcar o fluxo como publicado.
+
 Observacao honesta: nenhum iframe/proxy simples garante invisibilidade absoluta em DevTools. Para vender com marca propria, o ideal e usar Typebot self-hosted com dominio seu, remover marcas no tema/build quando necessario e servir o editor pelo proxy interno.
 
 ## Seu chatbot atual

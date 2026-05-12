@@ -1,6 +1,7 @@
 import { requireUser } from '@/server/auth/context';
 import { getFlows } from '@/server/data/flows';
 import { getIntegration } from '@/server/integrations/integration.service';
+import { getTypebotConfig } from '@/server/integrations/typebot-config';
 import { buildTypebotEditorUrl, getDefaultTypebotEditorTemplate } from '@/server/integrations/typebot';
 
 type PageProps = {
@@ -12,9 +13,10 @@ export default async function FlowsPage({ searchParams }: PageProps) {
   const agencyId = user.agencyId || '';
   const flows = agencyId ? await getFlows(agencyId) : [];
   const typebotIntegration = agencyId ? await getIntegration(agencyId, 'TYPEBOT') : null;
+  const typebotConfig = agencyId ? await getTypebotConfig(agencyId) : null;
   const editorTemplate =
+    typebotConfig?.editorTemplate ||
     (typebotIntegration?.metadata as { editorTemplate?: string } | null)?.editorTemplate ||
-    process.env.TYPEBOT_EDITOR_TEMPLATE ||
     getDefaultTypebotEditorTemplate(typebotIntegration?.baseUrl ?? process.env.TYPEBOT_BASE_URL);
   const hasVisualEngine = Boolean(
     (typebotIntegration?.baseUrl || process.env.TYPEBOT_BASE_URL) &&
@@ -223,9 +225,12 @@ export default async function FlowsPage({ searchParams }: PageProps) {
                     Abrir construtor
                   </a>
                 ) : (
-                  <span className="rounded-full border border-amber-400/30 px-4 py-2 text-xs text-amber-200">
-                    Configure o motor visual para editar
-                  </span>
+                  <form action="/api/flows/provision" method="post">
+                    <input type="hidden" name="flowId" value={flow.id} />
+                    <button className="rounded-full border border-amber-400/30 px-4 py-2 text-xs text-amber-200">
+                      Preparar construtor
+                    </button>
+                  </form>
                 )}
                 <form action="/api/flows/status" method="post">
                   <input type="hidden" name="flowId" value={flow.id} />

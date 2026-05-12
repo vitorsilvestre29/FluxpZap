@@ -82,7 +82,7 @@ export default async function AppHomePage() {
           <section className="mt-12 grid gap-6 lg:grid-cols-3">
             {[
               { title: 'Clientes', detail: 'Cadastre e gerencie as contas.' , href: '/dashboard/clients'},
-              { title: 'Fluxos', detail: 'Crie e publique Typebots.', href: '/dashboard/flows' },
+              { title: 'Fluxos', detail: 'Crie e publique conversas visuais.', href: '/dashboard/flows' },
               { title: 'Instancias', detail: 'Conecte WhatsApp.', href: '/dashboard/instances' },
             ].map((card) => (
               <a key={card.title} href={card.href} className="panel rounded-3xl p-6">

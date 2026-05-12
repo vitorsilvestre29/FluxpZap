@@ -105,3 +105,31 @@ export async function createTypebot(config: TypebotConfig, input: { name: string
     publishedUrl: publicId && config.viewerUrl ? `${config.viewerUrl.replace(/\/$/, '')}/${publicId}` : null,
   };
 }
+
+export async function publishTypebot(config: TypebotConfig, typebotId: string) {
+  const apiUrl = (config.apiUrl || getDefaultTypebotApiUrl(config.baseUrl))?.replace(/\/$/, '');
+  const apiKey = config.apiKey;
+
+  if (!apiUrl || !apiKey) {
+    return {
+      ok: false as const,
+      reason: 'TYPEBOT_NOT_CONFIGURED',
+    };
+  }
+
+  const response = await fetch(`${apiUrl}/typebots/${typebotId}/publish`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+    },
+  });
+
+  if (!response.ok) {
+    const message = await response.text().catch(() => '');
+    throw new Error(`Typebot publish failed: ${response.status} ${message}`);
+  }
+
+  return {
+    ok: true as const,
+  };
+}

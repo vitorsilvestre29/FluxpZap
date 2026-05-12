@@ -19,9 +19,9 @@ export const metadata: Metadata = {
     default: "Fluxozap",
     template: "%s | Fluxozap",
   },
-  description: "SaaS white-label para agencias venderem chatbots de WhatsApp com Typebot e Evolution API.",
+  description: "SaaS white-label para agencias venderem chatbots de WhatsApp com construtor visual e Evolution API.",
   applicationName: "Fluxozap",
-  keywords: ["WhatsApp", "chatbot", "Typebot", "Evolution API", "SaaS", "white-label"],
+  keywords: ["WhatsApp", "chatbot", "construtor visual", "Evolution API", "SaaS", "white-label"],
 };
 
 export default function RootLayout({

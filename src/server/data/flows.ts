@@ -12,6 +12,12 @@ export async function getFlows(agencyId: string) {
   });
 }
 
+export async function getFlow(agencyId: string, flowId: string) {
+  return prisma.typebotFlow.findFirst({
+    where: { id: flowId, agencyId },
+  });
+}
+
 export async function createFlow(
   agencyId: string,
   data: {
@@ -24,6 +30,7 @@ export async function createFlow(
     publishedUrl?: string;
     evolutionBotApiUrl?: string;
     evolutionBotApiKey?: string;
+    status?: 'DRAFT' | 'READY' | 'PUBLISHED' | 'PAUSED';
   },
 ) {
   return prisma.typebotFlow.create({
@@ -38,6 +45,7 @@ export async function createFlow(
       publishedUrl: data.publishedUrl || null,
       evolutionBotApiUrl: data.evolutionBotApiUrl || null,
       evolutionBotApiKey: data.evolutionBotApiKey || null,
+      status: data.status ?? 'DRAFT',
     },
   });
 }
@@ -105,6 +113,28 @@ export async function setFlowEvolutionBotId(agencyId: string, flowId: string, ev
   return prisma.typebotFlow.updateMany({
     where: { id: flowId, agencyId },
     data: { evolutionBotId },
+  });
+}
+
+export async function setFlowTypebotProvisioning(
+  agencyId: string,
+  flowId: string,
+  data: {
+    typebotId: string;
+    typebotWorkspaceId?: string | null;
+    editorUrl?: string | null;
+    publishedUrl?: string | null;
+  },
+) {
+  return prisma.typebotFlow.updateMany({
+    where: { id: flowId, agencyId },
+    data: {
+      typebotId: data.typebotId,
+      typebotWorkspaceId: data.typebotWorkspaceId || null,
+      editorUrl: data.editorUrl || null,
+      publishedUrl: data.publishedUrl || null,
+      status: 'READY',
+    },
   });
 }
 

@@ -2,12 +2,8 @@ import { NextResponse } from 'next/server';
 
 import { requireUser } from '@/server/auth/context';
 import { createFlow, updateFlow } from '@/server/data/flows';
-import { getIntegration } from '@/server/integrations/integration.service';
-import {
-  createTypebot,
-  getDefaultTypebotApiUrl,
-  getDefaultTypebotEditorTemplate,
-} from '@/server/integrations/typebot';
+import { getTypebotConfig } from '@/server/integrations/typebot-config';
+import { createTypebot } from '@/server/integrations/typebot';
 import { formDataToObject } from '@/server/utils/form';
 import { redirectUrl } from '@/server/utils/url';
 
@@ -59,33 +55,11 @@ export async function POST(request: Request) {
     } = {};
 
     if (provider === 'TYPEBOT') {
-      const integration = await getIntegration(user.agencyId, 'TYPEBOT');
-      const metadata = integration?.metadata as
-        | {
-            editorTemplate?: string;
-            apiUrl?: string;
-            workspaceId?: string;
-            viewerUrl?: string;
-          }
-        | null;
-      const baseUrl = integration?.baseUrl || process.env.TYPEBOT_BASE_URL || '';
-      const editorTemplate =
-        metadata?.editorTemplate || process.env.TYPEBOT_EDITOR_TEMPLATE || getDefaultTypebotEditorTemplate(baseUrl);
-      const apiUrl = metadata?.apiUrl || process.env.TYPEBOT_API_URL || getDefaultTypebotApiUrl(baseUrl);
-      const workspaceId = metadata?.workspaceId || process.env.TYPEBOT_WORKSPACE_ID || null;
-      const viewerUrl = metadata?.viewerUrl || process.env.TYPEBOT_VIEWER_URL || null;
+      const typebotConfig = await getTypebotConfig(user.agencyId);
 
       try {
         const created = await createTypebot(
-          {
-            baseUrl,
-            editorTemplate,
-            apiUrl,
-            apiKey: integration?.apiKey || process.env.TYPEBOT_API_KEY || null,
-            workspaceId,
-            viewerUrl,
-            maskedBasePath: '/_fluxo-builder',
-          },
+          typebotConfig,
           {
             name: data.name,
             description: data.description,
@@ -95,7 +69,7 @@ export async function POST(request: Request) {
         if (created.ok) {
           typebotData = {
             typebotId: created.typebotId,
-            typebotWorkspaceId: workspaceId,
+            typebotWorkspaceId: typebotConfig.workspaceId,
             editorUrl: created.editorUrl,
             publishedUrl: created.publishedUrl,
           };
@@ -115,6 +89,7 @@ export async function POST(request: Request) {
       publishedUrl: typebotData.publishedUrl || data.publishedUrl,
       evolutionBotApiUrl: data.evolutionBotApiUrl,
       evolutionBotApiKey: data.evolutionBotApiKey,
+      status: typebotData.typebotId ? 'READY' : 'DRAFT',
     });
   }
 
