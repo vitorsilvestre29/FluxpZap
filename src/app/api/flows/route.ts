@@ -2,22 +2,30 @@ import { NextResponse } from 'next/server';
 
 import { requireUser } from '@/server/auth/context';
 import { createFlow, updateFlow } from '@/server/data/flows';
+import { getIntegration } from '@/server/integrations/integration.service';
+import {
+  createTypebot,
+  getDefaultTypebotApiUrl,
+  getDefaultTypebotEditorTemplate,
+} from '@/server/integrations/typebot';
 import { formDataToObject } from '@/server/utils/form';
+import { redirectUrl } from '@/server/utils/url';
 
 export async function POST(request: Request) {
   const user = await requireUser();
   if (!user.agencyId) {
-    return NextResponse.redirect(new URL('/dashboard/flows?error=Sem%20agencia', request.url));
+    return NextResponse.redirect(redirectUrl('/dashboard/flows?error=Sem%20agencia', request));
   }
 
   const formData = await request.formData();
   const data = formDataToObject(formData);
+  const provider = data.provider === 'EVOLUTION_BOT' ? 'EVOLUTION_BOT' : 'TYPEBOT';
 
   if (data.flowId) {
     await updateFlow(user.agencyId, data.flowId, {
       name: data.name,
       description: data.description,
-      provider: data.provider === 'EVOLUTION_BOT' ? 'EVOLUTION_BOT' : 'TYPEBOT',
+      provider,
       typebotId: data.typebotId,
       typebotWorkspaceId: data.typebotWorkspaceId,
       editorUrl: data.editorUrl,
@@ -43,16 +51,72 @@ export async function POST(request: Request) {
           : 'DRAFT',
     });
   } else {
+    let typebotData: {
+      typebotId?: string | null;
+      typebotWorkspaceId?: string | null;
+      editorUrl?: string | null;
+      publishedUrl?: string | null;
+    } = {};
+
+    if (provider === 'TYPEBOT') {
+      const integration = await getIntegration(user.agencyId, 'TYPEBOT');
+      const metadata = integration?.metadata as
+        | {
+            editorTemplate?: string;
+            apiUrl?: string;
+            workspaceId?: string;
+            viewerUrl?: string;
+          }
+        | null;
+      const baseUrl = integration?.baseUrl || process.env.TYPEBOT_BASE_URL || '';
+      const editorTemplate =
+        metadata?.editorTemplate || process.env.TYPEBOT_EDITOR_TEMPLATE || getDefaultTypebotEditorTemplate(baseUrl);
+      const apiUrl = metadata?.apiUrl || process.env.TYPEBOT_API_URL || getDefaultTypebotApiUrl(baseUrl);
+      const workspaceId = metadata?.workspaceId || process.env.TYPEBOT_WORKSPACE_ID || null;
+      const viewerUrl = metadata?.viewerUrl || process.env.TYPEBOT_VIEWER_URL || null;
+
+      try {
+        const created = await createTypebot(
+          {
+            baseUrl,
+            editorTemplate,
+            apiUrl,
+            apiKey: integration?.apiKey || process.env.TYPEBOT_API_KEY || null,
+            workspaceId,
+            viewerUrl,
+            maskedBasePath: '/_fluxo-builder',
+          },
+          {
+            name: data.name,
+            description: data.description,
+          },
+        );
+
+        if (created.ok) {
+          typebotData = {
+            typebotId: created.typebotId,
+            typebotWorkspaceId: workspaceId,
+            editorUrl: created.editorUrl,
+            publishedUrl: created.publishedUrl,
+          };
+        }
+      } catch (error) {
+        console.error('Typebot provisioning failed', error);
+      }
+    }
+
     await createFlow(user.agencyId, {
       name: data.name,
       description: data.description,
-      provider: data.provider === 'EVOLUTION_BOT' ? 'EVOLUTION_BOT' : 'TYPEBOT',
-      typebotId: data.typebotId,
-      publishedUrl: data.publishedUrl,
+      provider,
+      typebotId: typebotData.typebotId || data.typebotId,
+      typebotWorkspaceId: typebotData.typebotWorkspaceId || data.typebotWorkspaceId,
+      editorUrl: typebotData.editorUrl || data.editorUrl,
+      publishedUrl: typebotData.publishedUrl || data.publishedUrl,
       evolutionBotApiUrl: data.evolutionBotApiUrl,
       evolutionBotApiKey: data.evolutionBotApiKey,
     });
   }
 
-  return NextResponse.redirect(new URL('/dashboard/flows', request.url));
+  return NextResponse.redirect(redirectUrl('/dashboard/flows', request));
 }

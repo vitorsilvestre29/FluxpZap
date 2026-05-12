@@ -19,6 +19,8 @@ export async function createFlow(
     description?: string;
     provider?: 'EVOLUTION_BOT' | 'TYPEBOT';
     typebotId?: string;
+    typebotWorkspaceId?: string;
+    editorUrl?: string;
     publishedUrl?: string;
     evolutionBotApiUrl?: string;
     evolutionBotApiKey?: string;
@@ -31,6 +33,8 @@ export async function createFlow(
       description: data.description || null,
       provider: data.provider ?? 'TYPEBOT',
       typebotId: data.typebotId || null,
+      typebotWorkspaceId: data.typebotWorkspaceId || null,
+      editorUrl: data.editorUrl || null,
       publishedUrl: data.publishedUrl || null,
       evolutionBotApiUrl: data.evolutionBotApiUrl || null,
       evolutionBotApiKey: data.evolutionBotApiKey || null,

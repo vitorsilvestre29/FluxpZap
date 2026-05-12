@@ -65,8 +65,11 @@ Para mascarar melhor:
 
 - Use uma instalacao propria do Typebot.
 - Configure `TYPEBOT_BASE_URL` apontando para essa instalacao.
+- Configure `TYPEBOT_API_URL`, `TYPEBOT_API_KEY`, `TYPEBOT_WORKSPACE_ID` e `TYPEBOT_VIEWER_URL`.
 - Use `TYPEBOT_EDITOR_TEMPLATE="/_fluxo-builder/typebots/{{typebotId}}"`.
 - O Next.js faz rewrite de `/_fluxo-builder/*` para o `TYPEBOT_BASE_URL`.
+
+Com essas variaveis configuradas, a tela `/dashboard/flows` cria o bot no motor visual automaticamente e abre o editor dentro do Fluxozap pelo botao `Abrir construtor`. Sem essas variaveis, o fluxo ainda e salvo como rascunho, mas o editor fica pendente ate a integracao ser concluida.
 
 Observacao honesta: nenhum iframe/proxy simples garante invisibilidade absoluta em DevTools. Para vender com marca propria, o ideal e usar Typebot self-hosted com dominio seu, remover marcas no tema/build quando necessario e servir o editor pelo proxy interno.
 

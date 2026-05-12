@@ -1,6 +1,6 @@
 import { requireUser } from '@/server/auth/context';
 import { getIntegration } from '@/server/integrations/integration.service';
-import { getDefaultTypebotEditorTemplate } from '@/server/integrations/typebot';
+import { getDefaultTypebotApiUrl, getDefaultTypebotEditorTemplate } from '@/server/integrations/typebot';
 
 export default async function IntegrationsPage() {
   const user = await requireUser();
@@ -12,6 +12,9 @@ export default async function IntegrationsPage() {
     (typebot?.metadata as { editorTemplate?: string } | null)?.editorTemplate ||
     process.env.TYPEBOT_EDITOR_TEMPLATE ||
     getDefaultTypebotEditorTemplate(typebot?.baseUrl ?? process.env.TYPEBOT_BASE_URL);
+  const typebotMetadata = typebot?.metadata as
+    | { apiUrl?: string; workspaceId?: string; viewerUrl?: string }
+    | null;
 
   return (
     <div className="space-y-8">
@@ -57,8 +60,31 @@ export default async function IntegrationsPage() {
           />
           <input
             name="apiKey"
-            defaultValue={typebot?.apiKey ?? ''}
-            placeholder="Chave interna (opcional)"
+            defaultValue={typebot?.apiKey ?? process.env.TYPEBOT_API_KEY ?? ''}
+            placeholder="Chave interna do construtor"
+            className="rounded-2xl border border-slate-800 bg-slate-950/70 px-4 py-3 text-sm text-slate-100"
+          />
+          <input
+            name="workspaceId"
+            defaultValue={typebotMetadata?.workspaceId ?? process.env.TYPEBOT_WORKSPACE_ID ?? ''}
+            placeholder="Workspace ID"
+            className="rounded-2xl border border-slate-800 bg-slate-950/70 px-4 py-3 text-sm text-slate-100"
+          />
+          <input
+            name="apiUrl"
+            defaultValue={
+              typebotMetadata?.apiUrl ??
+              process.env.TYPEBOT_API_URL ??
+              getDefaultTypebotApiUrl(typebot?.baseUrl ?? process.env.TYPEBOT_BASE_URL) ??
+              ''
+            }
+            placeholder="URL da API interna"
+            className="rounded-2xl border border-slate-800 bg-slate-950/70 px-4 py-3 text-sm text-slate-100"
+          />
+          <input
+            name="viewerUrl"
+            defaultValue={typebotMetadata?.viewerUrl ?? process.env.TYPEBOT_VIEWER_URL ?? ''}
+            placeholder="URL publica dos bots"
             className="rounded-2xl border border-slate-800 bg-slate-950/70 px-4 py-3 text-sm text-slate-100"
           />
           <input

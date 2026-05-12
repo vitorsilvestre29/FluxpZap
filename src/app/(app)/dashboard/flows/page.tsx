@@ -16,19 +16,44 @@ export default async function FlowsPage({ searchParams }: PageProps) {
     (typebotIntegration?.metadata as { editorTemplate?: string } | null)?.editorTemplate ||
     process.env.TYPEBOT_EDITOR_TEMPLATE ||
     getDefaultTypebotEditorTemplate(typebotIntegration?.baseUrl ?? process.env.TYPEBOT_BASE_URL);
+  const hasVisualEngine = Boolean(
+    (typebotIntegration?.baseUrl || process.env.TYPEBOT_BASE_URL) &&
+      (typebotIntegration?.apiKey || process.env.TYPEBOT_API_KEY) &&
+      ((typebotIntegration?.metadata as { workspaceId?: string } | null)?.workspaceId ||
+        process.env.TYPEBOT_WORKSPACE_ID),
+  );
 
   return (
     <div className="space-y-8">
-      <header>
-        <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Fluxos</p>
-        <h1 className="mt-3 text-2xl font-semibold text-white">Construtor visual</h1>
+      <header className="flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Fluxos</p>
+          <h1 className="mt-3 text-2xl font-semibold text-white">Construtor Fluxozap</h1>
+          <p className="mt-2 max-w-2xl text-sm text-slate-400">
+            Crie fluxos visuais para seus clientes sem expor ferramentas tecnicas da operacao.
+          </p>
+        </div>
+        <span
+          className={`rounded-full px-3 py-1 text-xs ${
+            hasVisualEngine ? 'bg-emerald-400/15 text-emerald-200' : 'bg-amber-400/15 text-amber-200'
+          }`}
+        >
+          {hasVisualEngine ? 'Motor visual conectado' : 'Motor visual pendente'}
+        </span>
       </header>
 
       <section className="panel rounded-3xl p-6">
-        <h2 className="text-sm font-semibold text-white">Novo fluxo</h2>
-        {!editorTemplate && (
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <h2 className="text-sm font-semibold text-white">Novo fluxo</h2>
+            <p className="mt-1 text-sm text-slate-400">
+              O Fluxozap cria o fluxo e prepara o construtor visual automaticamente.
+            </p>
+          </div>
+        </div>
+        {!hasVisualEngine && (
           <div className="mt-4 rounded-2xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-xs text-amber-200">
-            Configure o motor visual em Integracoes para abrir o construtor embutido.
+            Configure o motor visual em Integracoes para criar e editar fluxos dentro do Fluxozap.
           </div>
         )}
         {searchParams?.error && (
@@ -36,50 +61,21 @@ export default async function FlowsPage({ searchParams }: PageProps) {
             {searchParams.error}
           </div>
         )}
-        <form action="/api/flows" method="post" className="mt-4 grid gap-4 md:grid-cols-2">
+        <form action="/api/flows" method="post" className="mt-5 grid gap-4">
+          <input type="hidden" name="provider" value="TYPEBOT" />
           <input
             name="name"
             required
             placeholder="Nome do fluxo"
             className="rounded-2xl border border-slate-800 bg-slate-950/70 px-4 py-3 text-sm text-slate-100"
           />
-          <select
-            name="provider"
-            defaultValue="TYPEBOT"
-            className="rounded-2xl border border-slate-800 bg-slate-950/70 px-4 py-3 text-sm text-slate-100"
-          >
-            <option value="TYPEBOT">Construtor visual</option>
-            <option value="EVOLUTION_BOT">API propria</option>
-          </select>
-          <input
-            name="evolutionBotApiUrl"
-            defaultValue={process.env.EVOLUTION_BOT_API_URL ?? ''}
-            placeholder="URL da API propria (opcional)"
-            className="rounded-2xl border border-slate-800 bg-slate-950/70 px-4 py-3 text-sm text-slate-100"
-          />
-          <input
-            name="evolutionBotApiKey"
-            defaultValue={process.env.EVOLUTION_BOT_API_KEY ?? ''}
-            placeholder="Chave da API propria (opcional)"
-            className="rounded-2xl border border-slate-800 bg-slate-950/70 px-4 py-3 text-sm text-slate-100"
-          />
-          <input
-            name="typebotId"
-            placeholder="Typebot ID (opcional)"
-            className="rounded-2xl border border-slate-800 bg-slate-950/70 px-4 py-3 text-sm text-slate-100"
-          />
-          <input
-            name="publishedUrl"
-            placeholder="URL publicada do Typebot"
-            className="rounded-2xl border border-slate-800 bg-slate-950/70 px-4 py-3 text-sm text-slate-100"
-          />
           <textarea
             name="description"
-            placeholder="Descricao"
-            className="md:col-span-2 rounded-2xl border border-slate-800 bg-slate-950/70 px-4 py-3 text-sm text-slate-100"
+            placeholder="Descricao para sua equipe"
+            className="rounded-2xl border border-slate-800 bg-slate-950/70 px-4 py-3 text-sm text-slate-100"
             rows={3}
           />
-          <button className="md:col-span-2 rounded-full bg-cyan-400 px-4 py-3 text-sm font-semibold text-slate-900">
+          <button className="rounded-full bg-cyan-400 px-4 py-3 text-sm font-semibold text-slate-900">
             Criar fluxo
           </button>
         </form>
@@ -92,34 +88,44 @@ export default async function FlowsPage({ searchParams }: PageProps) {
           </div>
         )}
         {flows.map((flow) => {
-          const editorUrl = flow.editorUrl || (editorTemplate
-            ? buildTypebotEditorUrl({
-                baseUrl: typebotIntegration?.baseUrl || process.env.TYPEBOT_BASE_URL || '',
-                editorTemplate,
-                maskedBasePath: '/_fluxo-builder',
-              }, flow)
-            : null);
+          const editorUrl =
+            flow.editorUrl ||
+            (editorTemplate
+              ? buildTypebotEditorUrl(
+                  {
+                    baseUrl: typebotIntegration?.baseUrl || process.env.TYPEBOT_BASE_URL || '',
+                    editorTemplate,
+                    maskedBasePath: '/_fluxo-builder',
+                  },
+                  flow,
+                )
+              : null);
+          const canOpenEditor = Boolean(editorUrl);
 
           return (
-            <div
-              key={flow.id}
-            className="grid gap-4 rounded-2xl border border-slate-800 bg-slate-950/60 px-4 py-4"
-          >
+            <article key={flow.id} className="grid gap-5 rounded-2xl border border-slate-800 bg-slate-950/60 p-5">
               <div className="flex flex-wrap items-start justify-between gap-4">
                 <div>
-                <p className="text-sm font-semibold text-white">{flow.name}</p>
-                <p className="text-xs text-slate-400">{flow.description ?? 'Sem descricao'}</p>
-                <p className="text-xs text-slate-500">
-                  {flow.provider === 'TYPEBOT' ? 'Construtor visual' : 'API propria'} · Vinculos: {flow._count.links}
-                  {flow.evolutionBotId ? ` · EvolutionBot: ${flow.evolutionBotId}` : ''}
-                </p>
+                  <p className="text-sm font-semibold text-white">{flow.name}</p>
+                  <p className="mt-1 text-xs text-slate-400">{flow.description ?? 'Sem descricao'}</p>
+                  <p className="mt-2 text-xs text-slate-500">
+                    Vinculos: {flow._count.links} · {canOpenEditor ? 'Construtor pronto' : 'Aguardando motor visual'}
+                  </p>
                 </div>
                 <span className="rounded-full border border-slate-700 px-3 py-1 text-xs uppercase tracking-[0.2em] text-slate-300">
                   {flow.status}
                 </span>
               </div>
+
               <form action="/api/flows" method="post" className="grid gap-3 md:grid-cols-2">
                 <input type="hidden" name="flowId" value={flow.id} />
+                <input type="hidden" name="provider" value={flow.provider} />
+                <input type="hidden" name="typebotId" value={flow.typebotId ?? ''} />
+                <input type="hidden" name="typebotWorkspaceId" value={flow.typebotWorkspaceId ?? ''} />
+                <input type="hidden" name="editorUrl" value={flow.editorUrl ?? ''} />
+                <input type="hidden" name="publishedUrl" value={flow.publishedUrl ?? ''} />
+                <input type="hidden" name="evolutionBotApiUrl" value={flow.evolutionBotApiUrl ?? ''} />
+                <input type="hidden" name="evolutionBotApiKey" value={flow.evolutionBotApiKey ?? ''} />
                 <input
                   name="name"
                   required
@@ -136,153 +142,90 @@ export default async function FlowsPage({ searchParams }: PageProps) {
                   <option value="PUBLISHED">Publicado</option>
                   <option value="PAUSED">Pausado</option>
                 </select>
-                <select
-                  name="provider"
-                  defaultValue={flow.provider}
-                  className="rounded-2xl border border-slate-800 bg-slate-950/70 px-4 py-3 text-sm text-slate-100"
-                >
-                  <option value="TYPEBOT">Construtor visual</option>
-                  <option value="EVOLUTION_BOT">API propria</option>
-                </select>
-                <input
-                  name="evolutionBotApiUrl"
-                  defaultValue={flow.evolutionBotApiUrl ?? process.env.EVOLUTION_BOT_API_URL ?? ''}
-                  placeholder="URL da API propria"
-                  className="rounded-2xl border border-slate-800 bg-slate-950/70 px-4 py-3 text-sm text-slate-100"
-                />
-                <input
-                  name="evolutionBotApiKey"
-                  defaultValue={flow.evolutionBotApiKey ?? process.env.EVOLUTION_BOT_API_KEY ?? ''}
-                  placeholder="Chave da API propria"
-                  className="rounded-2xl border border-slate-800 bg-slate-950/70 px-4 py-3 text-sm text-slate-100"
-                />
-                <select
-                  name="triggerType"
-                  defaultValue={flow.triggerType}
-                  className="rounded-2xl border border-slate-800 bg-slate-950/70 px-4 py-3 text-sm text-slate-100"
-                >
-                  <option value="all">Todas as mensagens</option>
-                  <option value="keyword">Palavra-chave</option>
-                  <option value="none">Manual</option>
-                  <option value="advanced">Avancado</option>
-                </select>
-                <select
-                  name="triggerOperator"
-                  defaultValue={flow.triggerOperator ?? 'contains'}
-                  className="rounded-2xl border border-slate-800 bg-slate-950/70 px-4 py-3 text-sm text-slate-100"
-                >
-                  <option value="contains">Contem</option>
-                  <option value="equals">Igual</option>
-                  <option value="startsWith">Comeca com</option>
-                  <option value="endsWith">Termina com</option>
-                  <option value="regex">Regex</option>
-                </select>
-                <input
-                  name="triggerValue"
-                  defaultValue={flow.triggerValue ?? ''}
-                  placeholder="Gatilho (opcional)"
-                  className="rounded-2xl border border-slate-800 bg-slate-950/70 px-4 py-3 text-sm text-slate-100"
-                />
-                <input
-                  name="typebotId"
-                  defaultValue={flow.typebotId ?? ''}
-                  placeholder="Typebot ID"
-                  className="rounded-2xl border border-slate-800 bg-slate-950/70 px-4 py-3 text-sm text-slate-100"
-                />
-                <input
-                  name="typebotWorkspaceId"
-                  defaultValue={flow.typebotWorkspaceId ?? ''}
-                  placeholder="Workspace ID"
-                  className="rounded-2xl border border-slate-800 bg-slate-950/70 px-4 py-3 text-sm text-slate-100"
-                />
-                <input
-                  name="editorUrl"
-                  defaultValue={flow.editorUrl ?? ''}
-                  placeholder="URL direta do editor"
-                  className="rounded-2xl border border-slate-800 bg-slate-950/70 px-4 py-3 text-sm text-slate-100"
-                />
-                <input
-                  name="publishedUrl"
-                  defaultValue={flow.publishedUrl ?? ''}
-                  placeholder="URL publicada"
-                  className="rounded-2xl border border-slate-800 bg-slate-950/70 px-4 py-3 text-sm text-slate-100"
-                />
                 <textarea
                   name="description"
                   defaultValue={flow.description ?? ''}
                   rows={2}
+                  placeholder="Descricao"
                   className="md:col-span-2 rounded-2xl border border-slate-800 bg-slate-950/70 px-4 py-3 text-sm text-slate-100"
                 />
-                <div className="md:col-span-2 grid gap-3 rounded-2xl border border-slate-800 bg-slate-950/50 p-4 md:grid-cols-4">
-                  <label className="flex items-center gap-2 text-xs text-slate-300">
-                    <input name="keepOpen" type="checkbox" defaultChecked={flow.keepOpen} />
-                    Manter sessao
-                  </label>
-                  <label className="flex items-center gap-2 text-xs text-slate-300">
-                    <input name="stopBotFromMe" type="checkbox" defaultChecked={flow.stopBotFromMe} />
-                    Pausar quando eu responder
-                  </label>
-                  <label className="flex items-center gap-2 text-xs text-slate-300">
-                    <input name="listeningFromMe" type="checkbox" defaultChecked={flow.listeningFromMe} />
-                    Ouvir minhas mensagens
-                  </label>
-                  <label className="flex items-center gap-2 text-xs text-slate-300">
-                    <input name="splitMessages" type="checkbox" defaultChecked={flow.splitMessages} />
-                    Dividir mensagens
-                  </label>
-                </div>
-                <input
-                  name="keywordFinish"
-                  defaultValue={flow.keywordFinish}
-                  placeholder="Palavra para encerrar"
-                  className="rounded-2xl border border-slate-800 bg-slate-950/70 px-4 py-3 text-sm text-slate-100"
-                />
-                <input
-                  name="unknownMessage"
-                  defaultValue={flow.unknownMessage}
-                  placeholder="Mensagem padrao"
-                  className="rounded-2xl border border-slate-800 bg-slate-950/70 px-4 py-3 text-sm text-slate-100"
-                />
-                <input
-                  name="expire"
-                  type="number"
-                  defaultValue={flow.expire}
-                  placeholder="Expiracao"
-                  className="rounded-2xl border border-slate-800 bg-slate-950/70 px-4 py-3 text-sm text-slate-100"
-                />
-                <input
-                  name="debounceTime"
-                  type="number"
-                  defaultValue={flow.debounceTime}
-                  placeholder="Debounce"
-                  className="rounded-2xl border border-slate-800 bg-slate-950/70 px-4 py-3 text-sm text-slate-100"
-                />
-                <input
-                  name="delayMessage"
-                  type="number"
-                  defaultValue={flow.delayMessage}
-                  placeholder="Delay"
-                  className="rounded-2xl border border-slate-800 bg-slate-950/70 px-4 py-3 text-sm text-slate-100"
-                />
-                <input
-                  name="timePerChar"
-                  type="number"
-                  defaultValue={flow.timePerChar}
-                  placeholder="Tempo por caractere"
-                  className="rounded-2xl border border-slate-800 bg-slate-950/70 px-4 py-3 text-sm text-slate-100"
-                />
-                <button className="md:col-span-2 rounded-full border border-cyan-400/50 px-4 py-2 text-xs uppercase tracking-[0.2em] text-cyan-100">
-                  Salvar fluxo
+                <details className="md:col-span-2 rounded-2xl border border-slate-800 bg-slate-950/50 p-4">
+                  <summary className="cursor-pointer text-sm font-semibold text-slate-200">Regras de atendimento</summary>
+                  <div className="mt-4 grid gap-3 md:grid-cols-2">
+                    <select
+                      name="triggerType"
+                      defaultValue={flow.triggerType}
+                      className="rounded-2xl border border-slate-800 bg-slate-950/70 px-4 py-3 text-sm text-slate-100"
+                    >
+                      <option value="all">Todas as mensagens</option>
+                      <option value="keyword">Palavra-chave</option>
+                      <option value="none">Manual</option>
+                      <option value="advanced">Avancado</option>
+                    </select>
+                    <input
+                      name="triggerValue"
+                      defaultValue={flow.triggerValue ?? ''}
+                      placeholder="Palavra-chave ou gatilho"
+                      className="rounded-2xl border border-slate-800 bg-slate-950/70 px-4 py-3 text-sm text-slate-100"
+                    />
+                    <input type="hidden" name="triggerOperator" value={flow.triggerOperator ?? 'contains'} />
+                    <input type="hidden" name="debounceTime" value={flow.debounceTime} />
+                    <input type="hidden" name="delayMessage" value={flow.delayMessage} />
+                    <input type="hidden" name="timePerChar" value={flow.timePerChar} />
+                    <input
+                      name="keywordFinish"
+                      defaultValue={flow.keywordFinish}
+                      placeholder="Palavra para encerrar"
+                      className="rounded-2xl border border-slate-800 bg-slate-950/70 px-4 py-3 text-sm text-slate-100"
+                    />
+                    <input
+                      name="expire"
+                      type="number"
+                      defaultValue={flow.expire}
+                      placeholder="Expiracao em segundos"
+                      className="rounded-2xl border border-slate-800 bg-slate-950/70 px-4 py-3 text-sm text-slate-100"
+                    />
+                    <input
+                      name="unknownMessage"
+                      defaultValue={flow.unknownMessage}
+                      placeholder="Mensagem padrao"
+                      className="md:col-span-2 rounded-2xl border border-slate-800 bg-slate-950/70 px-4 py-3 text-sm text-slate-100"
+                    />
+                    <label className="flex items-center gap-2 text-xs text-slate-300">
+                      <input name="keepOpen" type="checkbox" defaultChecked={flow.keepOpen} />
+                      Manter sessao aberta
+                    </label>
+                    <label className="flex items-center gap-2 text-xs text-slate-300">
+                      <input name="stopBotFromMe" type="checkbox" defaultChecked={flow.stopBotFromMe} />
+                      Pausar quando um humano responder
+                    </label>
+                    <label className="flex items-center gap-2 text-xs text-slate-300">
+                      <input name="listeningFromMe" type="checkbox" defaultChecked={flow.listeningFromMe} />
+                      Considerar mensagens enviadas pela equipe
+                    </label>
+                    <label className="flex items-center gap-2 text-xs text-slate-300">
+                      <input name="splitMessages" type="checkbox" defaultChecked={flow.splitMessages} />
+                      Dividir respostas longas
+                    </label>
+                  </div>
+                </details>
+                <button className="rounded-full border border-cyan-400/50 px-4 py-2 text-xs uppercase tracking-[0.2em] text-cyan-100">
+                  Salvar
                 </button>
               </form>
+
               <div className="flex flex-wrap items-center gap-3">
-                {editorUrl && (
+                {canOpenEditor ? (
                   <a
                     className="rounded-full bg-cyan-400 px-4 py-2 text-xs font-semibold text-slate-900"
                     href={`/dashboard/flows/${flow.id}/editor`}
                   >
                     Abrir construtor
                   </a>
+                ) : (
+                  <span className="rounded-full border border-amber-400/30 px-4 py-2 text-xs text-amber-200">
+                    Configure o motor visual para editar
+                  </span>
                 )}
                 <form action="/api/flows/status" method="post">
                   <input type="hidden" name="flowId" value={flow.id} />
@@ -298,7 +241,7 @@ export default async function FlowsPage({ searchParams }: PageProps) {
                   </button>
                 </form>
               </div>
-            </div>
+            </article>
           );
         })}
       </section>

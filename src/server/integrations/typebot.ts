@@ -1,6 +1,10 @@
 type TypebotConfig = {
   baseUrl: string;
   editorTemplate: string;
+  apiUrl?: string | null;
+  apiKey?: string | null;
+  workspaceId?: string | null;
+  viewerUrl?: string | null;
   maskedBasePath?: string;
 };
 
@@ -29,4 +33,75 @@ export function buildTypebotEditorUrl(config: TypebotConfig, flow: TypebotFlow) 
 export function getDefaultTypebotEditorTemplate(baseUrl?: string | null) {
   if (!baseUrl) return '/_fluxo-builder/typebots/{{typebotId}}';
   return `${baseUrl.replace(/\/$/, '')}/typebots/{{typebotId}}`;
+}
+
+export function getDefaultTypebotApiUrl(baseUrl?: string | null) {
+  if (!baseUrl) return null;
+  return `${baseUrl.replace(/\/$/, '')}/api/v1`;
+}
+
+export async function createTypebot(config: TypebotConfig, input: { name: string; description?: string | null }) {
+  const apiUrl = (config.apiUrl || getDefaultTypebotApiUrl(config.baseUrl))?.replace(/\/$/, '');
+  const apiKey = config.apiKey;
+  const workspaceId = config.workspaceId;
+
+  if (!apiUrl || !apiKey || !workspaceId) {
+    return {
+      ok: false as const,
+      reason: 'TYPEBOT_NOT_CONFIGURED',
+    };
+  }
+
+  const response = await fetch(`${apiUrl}/typebots`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      workspaceId,
+      typebot: {
+        name: input.name,
+        settings: {
+          general: {
+            isBrandingEnabled: false,
+          },
+          publicShare: {
+            isEnabled: true,
+          },
+          metadata: {
+            title: input.name,
+            description: input.description || undefined,
+          },
+        },
+      },
+    }),
+  });
+
+  if (!response.ok) {
+    const message = await response.text().catch(() => '');
+    throw new Error(`Typebot create failed: ${response.status} ${message}`);
+  }
+
+  const payload = (await response.json()) as {
+    typebot?: {
+      id?: string;
+      publicId?: string | null;
+    };
+  };
+
+  const typebotId = payload.typebot?.id;
+  const publicId = payload.typebot?.publicId;
+
+  if (!typebotId) {
+    throw new Error('Typebot create failed: missing typebot id');
+  }
+
+  return {
+    ok: true as const,
+    typebotId,
+    publicId: publicId || null,
+    editorUrl: buildTypebotEditorUrl(config, { typebotId }),
+    publishedUrl: publicId && config.viewerUrl ? `${config.viewerUrl.replace(/\/$/, '')}/${publicId}` : null,
+  };
 }
