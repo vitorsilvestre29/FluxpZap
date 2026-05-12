@@ -4,7 +4,7 @@ import { prisma } from '@/server/db/prisma';
 import { signup, createVerificationToken } from '@/server/auth/auth.service';
 import { createSession } from '@/server/auth/session';
 import { sendMail } from '@/server/utils/mailer';
-import { buildUrl } from '@/server/utils/url';
+import { buildUrl, redirectUrl } from '@/server/utils/url';
 import { formDataToObject } from '@/server/utils/form';
 
 export async function POST(request: Request) {
@@ -19,14 +19,14 @@ export async function POST(request: Request) {
   });
 
   if (!result.success) {
-    const url = new URL('/auth/signup', request.url);
+    const url = redirectUrl('/auth/signup', request);
     url.searchParams.set('error', result.error);
     return NextResponse.redirect(url);
   }
 
   const user = await prisma.user.findUnique({ where: { id: result.data.userId } });
   if (!user) {
-    return NextResponse.redirect(new URL('/auth/signup', request.url));
+    return NextResponse.redirect(redirectUrl('/auth/signup', request));
   }
 
   const token = await createVerificationToken(user.id);
@@ -40,13 +40,13 @@ export async function POST(request: Request) {
 
   if (user.status === 'ACTIVE') {
     await createSession(user.id);
-    return NextResponse.redirect(new URL('/dashboard', request.url));
+    return NextResponse.redirect(redirectUrl('/dashboard', request));
   }
 
-  const redirectUrl = new URL('/auth/check-email', request.url);
+  const url = redirectUrl('/auth/check-email', request);
   if (process.env.NODE_ENV !== 'production') {
-    redirectUrl.searchParams.set('token', token);
+    url.searchParams.set('token', token);
   }
 
-  return NextResponse.redirect(redirectUrl);
+  return NextResponse.redirect(url);
 }

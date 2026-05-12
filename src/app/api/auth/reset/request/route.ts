@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/server/db/prisma';
 import { createResetToken } from '@/server/auth/auth.service';
 import { sendMail } from '@/server/utils/mailer';
-import { buildUrl } from '@/server/utils/url';
+import { buildUrl, redirectUrl } from '@/server/utils/url';
 import { formDataToObject } from '@/server/utils/form';
 
 export async function POST(request: Request) {
@@ -12,7 +12,7 @@ export async function POST(request: Request) {
 
   const user = await prisma.user.findUnique({ where: { email: data.email } });
   if (!user) {
-    return NextResponse.redirect(new URL('/auth/reset', request.url));
+    return NextResponse.redirect(redirectUrl('/auth/reset', request));
   }
 
   const token = await createResetToken(user.id);
@@ -24,10 +24,10 @@ export async function POST(request: Request) {
     html: `Clique para redefinir: ${resetUrl}`,
   });
 
-  const redirectUrl = new URL('/auth/reset', request.url);
+  const url = redirectUrl('/auth/reset', request);
   if (process.env.NODE_ENV !== 'production') {
-    redirectUrl.searchParams.set('token', token);
+    url.searchParams.set('token', token);
   }
 
-  return NextResponse.redirect(redirectUrl);
+  return NextResponse.redirect(url);
 }
