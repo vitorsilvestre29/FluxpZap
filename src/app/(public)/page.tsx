@@ -3,7 +3,7 @@ import Link from 'next/link';
 const features = [
   'Agencias aprovadas manualmente',
   '1 WhatsApp dedicado por cliente',
-  'Editor Typebot embutido',
+  'Construtor visual embutido',
   'QR, reconexao e status Evolution',
   'Publicacao e pausa por bot',
   'Sessoes basicas por cliente',
@@ -47,7 +47,7 @@ export default function PublicHomePage() {
             Venda chatbots de WhatsApp com painel proprio, governanca e operacao centralizada.
           </h1>
           <p className="mt-6 max-w-2xl text-lg text-slate-300">
-            O Fluxozap organiza clientes, numeros, Typebot e Evolution API em um produto pronto para agencia vender,
+            O Fluxozap organiza clientes, numeros, fluxos e Evolution API em um produto pronto para agencia vender,
             entregar e acompanhar sem dar acesso ao cliente final.
           </p>
           <div className="mt-8 flex flex-wrap gap-4">
@@ -62,19 +62,19 @@ export default function PublicHomePage() {
 
         <div className="border border-slate-800 bg-slate-900/70 p-6">
           <div className="flex items-center justify-between">
-            <p className="text-sm font-semibold text-white">Operacao da agencia</p>
-            <span className="rounded-full bg-emerald-400/15 px-3 py-1 text-xs text-emerald-200">Ativa</span>
+            <p className="text-sm font-semibold text-white">Painel da agencia</p>
+            <span className="rounded-full bg-cyan-400/15 px-3 py-1 text-xs text-cyan-200">Preview</span>
           </div>
           <div className="mt-6 grid gap-3">
             {[
-              ['Clientes ativos', '42'],
-              ['WhatsApps conectados', '39'],
-              ['Bots publicados', '36'],
-              ['Sessoes abertas', '184'],
-            ].map(([label, value]) => (
-              <div key={label} className="flex items-center justify-between border border-slate-800 bg-slate-950 px-4 py-3">
-                <span className="text-sm text-slate-300">{label}</span>
-                <strong className="text-lg text-white">{value}</strong>
+              ['Clientes', 'Cadastre e organize cada operacao por agencia'],
+              ['WhatsApp', 'Conecte QR, acompanhe status e reconecte instancias'],
+              ['Fluxos', 'Crie, publique e pause bots por cliente'],
+              ['Sessoes', 'Acompanhe atendimentos e atividade basica'],
+            ].map(([label, detail]) => (
+              <div key={label} className="border border-slate-800 bg-slate-950 px-4 py-3">
+                <span className="text-sm font-semibold text-white">{label}</span>
+                <p className="mt-1 text-sm text-slate-400">{detail}</p>
               </div>
             ))}
           </div>
