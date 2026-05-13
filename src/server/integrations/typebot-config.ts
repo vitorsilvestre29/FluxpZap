@@ -20,7 +20,7 @@ export async function getTypebotConfig(agencyId: string) {
     apiKey: integration?.apiKey || process.env.TYPEBOT_API_KEY || null,
     workspaceId: metadata?.workspaceId || process.env.TYPEBOT_WORKSPACE_ID || null,
     viewerUrl: metadata?.viewerUrl || process.env.TYPEBOT_VIEWER_URL || null,
-    maskedBasePath: '/_fluxo-builder',
+    maskedBasePath: '/fluxo-builder',
   };
 }
 

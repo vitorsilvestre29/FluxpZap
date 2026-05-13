@@ -107,7 +107,7 @@ export async function GET(request: Request) {
           workspaceId: sso.workspaceId,
           editorTemplate,
           viewerUrl,
-          maskedBasePath: '/_fluxo-builder',
+          maskedBasePath: '/fluxo-builder',
         },
         {
           name: readyFlow.name,
@@ -140,16 +140,14 @@ export async function GET(request: Request) {
     }
   }
 
-  const editorUrl =
-    readyFlow.editorUrl ||
-    buildTypebotEditorUrl(
-      {
-        baseUrl,
-        editorTemplate,
-        maskedBasePath: '/_fluxo-builder',
-      },
-      readyFlow,
-    );
+  const editorUrl = buildTypebotEditorUrl(
+    {
+      baseUrl,
+      editorTemplate,
+      maskedBasePath: '/fluxo-builder',
+    },
+    readyFlow,
+  );
 
   if (!editorUrl) {
     return NextResponse.redirect(redirectUrl('/dashboard/flows?error=Construtor%20indisponivel', request));

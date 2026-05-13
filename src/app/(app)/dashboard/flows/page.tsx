@@ -99,7 +99,7 @@ export default async function FlowsPage({ searchParams }: PageProps) {
                   {
                     baseUrl: typebotIntegration?.baseUrl || process.env.TYPEBOT_BASE_URL || '',
                     editorTemplate,
-                    maskedBasePath: '/_fluxo-builder',
+                    maskedBasePath: '/fluxo-builder',
                   },
                   flow,
                 )

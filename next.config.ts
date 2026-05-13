@@ -8,7 +8,7 @@ const nextConfig: NextConfig = {
 
     return [
       {
-        source: '/_fluxo-builder/:path*',
+        source: '/fluxo-builder/:path*',
         destination: `${typebotBaseUrl}/:path*`,
       },
     ];

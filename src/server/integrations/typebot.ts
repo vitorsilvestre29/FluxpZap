@@ -32,7 +32,7 @@ export function buildTypebotEditorUrl(config: TypebotConfig, flow: TypebotFlow) 
 }
 
 export function getDefaultTypebotEditorTemplate(baseUrl?: string | null) {
-  if (!baseUrl) return '/_fluxo-builder/typebots/{{typebotId}}';
+  if (!baseUrl) return '/fluxo-builder/typebots/{{typebotId}}';
   return `${baseUrl.replace(/\/$/, '')}/typebots/{{typebotId}}`;
 }
 
