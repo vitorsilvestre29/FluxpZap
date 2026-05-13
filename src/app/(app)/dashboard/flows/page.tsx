@@ -18,11 +18,13 @@ export default async function FlowsPage({ searchParams }: PageProps) {
     typebotConfig?.editorTemplate ||
     (typebotIntegration?.metadata as { editorTemplate?: string } | null)?.editorTemplate ||
     getDefaultTypebotEditorTemplate(typebotIntegration?.baseUrl ?? process.env.TYPEBOT_BASE_URL);
+  const hasTypebotSso = Boolean(process.env.TYPEBOT_BASE_URL && process.env.TYPEBOT_SSO_SECRET);
   const hasVisualEngine = Boolean(
-    (typebotIntegration?.baseUrl || process.env.TYPEBOT_BASE_URL) &&
-      (typebotIntegration?.apiKey || process.env.TYPEBOT_API_KEY) &&
-      ((typebotIntegration?.metadata as { workspaceId?: string } | null)?.workspaceId ||
-        process.env.TYPEBOT_WORKSPACE_ID),
+    hasTypebotSso ||
+      ((typebotIntegration?.baseUrl || process.env.TYPEBOT_BASE_URL) &&
+        (typebotIntegration?.apiKey || process.env.TYPEBOT_API_KEY) &&
+        ((typebotIntegration?.metadata as { workspaceId?: string } | null)?.workspaceId ||
+          process.env.TYPEBOT_WORKSPACE_ID)),
   );
 
   return (
@@ -102,7 +104,7 @@ export default async function FlowsPage({ searchParams }: PageProps) {
                   flow,
                 )
               : null);
-          const canOpenEditor = Boolean(editorUrl);
+          const canOpenEditor = Boolean(editorUrl || hasTypebotSso);
 
           return (
             <article key={flow.id} className="grid gap-5 rounded-2xl border border-slate-800 bg-slate-950/60 p-5">

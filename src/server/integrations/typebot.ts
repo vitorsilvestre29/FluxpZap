@@ -17,6 +17,7 @@ export function buildTypebotEditorUrl(config: TypebotConfig, flow: TypebotFlow) 
   const editorUrl = config.editorTemplate.replace('{{typebotId}}', flow.typebotId);
 
   if (!config.maskedBasePath || !config.baseUrl) return editorUrl;
+  if (editorUrl.startsWith(config.maskedBasePath)) return editorUrl;
 
   try {
     const baseUrl = new URL(config.baseUrl);
