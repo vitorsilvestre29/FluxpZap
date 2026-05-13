@@ -79,8 +79,8 @@ export async function GET(request: Request) {
   const apiUrl = (currentMetadata.apiUrl as string | undefined) || process.env.TYPEBOT_API_URL || getDefaultTypebotApiUrl(baseUrl);
   const viewerUrl = (currentMetadata.viewerUrl as string | undefined) || process.env.TYPEBOT_VIEWER_URL || null;
   const editorTemplate = normalizeTypebotEditorTemplate(
-    (currentMetadata.editorTemplate as string | undefined) ||
-      process.env.TYPEBOT_EDITOR_TEMPLATE ||
+    process.env.TYPEBOT_EDITOR_TEMPLATE ||
+      (currentMetadata.editorTemplate as string | undefined) ||
       getDefaultTypebotEditorTemplate(baseUrl),
   );
 
@@ -146,7 +146,6 @@ export async function GET(request: Request) {
     {
       baseUrl,
       editorTemplate,
-      maskedBasePath: '/fluxo-builder',
     },
     readyFlow,
   );
@@ -155,18 +154,10 @@ export async function GET(request: Request) {
     return NextResponse.redirect(redirectUrl('/dashboard/flows?error=Construtor%20indisponivel', request));
   }
 
-  const response = NextResponse.redirect(redirectUrl(editorUrl, request));
-  const expires = new Date(sso.expires);
-  const cookieOptions = {
-    httpOnly: true,
-    sameSite: 'lax' as const,
-    secure: process.env.NODE_ENV === 'production',
-    expires,
-    path: '/',
-  };
+  const target = new URL(editorUrl, baseUrl);
+  const handoffUrl = new URL('/api/fluxozap/sso', baseUrl);
+  handoffUrl.searchParams.set('sessionToken', sso.sessionToken);
+  handoffUrl.searchParams.set('redirectPath', `${target.pathname}${target.search}${target.hash}`);
 
-  response.cookies.set('authjs.session-token', sso.sessionToken, cookieOptions);
-  response.cookies.set('__Secure-authjs.session-token', sso.sessionToken, cookieOptions);
-
-  return response;
+  return NextResponse.redirect(handoffUrl);
 }
