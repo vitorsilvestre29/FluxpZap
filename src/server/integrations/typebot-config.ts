@@ -1,5 +1,5 @@
 import { getIntegration } from './integration.service';
-import { getDefaultTypebotApiUrl, getDefaultTypebotEditorTemplate } from './typebot';
+import { getDefaultTypebotApiUrl, getDefaultTypebotEditorTemplate, normalizeTypebotEditorTemplate } from './typebot';
 
 export async function getTypebotConfig(agencyId: string) {
   const integration = await getIntegration(agencyId, 'TYPEBOT');
@@ -15,7 +15,9 @@ export async function getTypebotConfig(agencyId: string) {
 
   return {
     baseUrl,
-    editorTemplate: metadata?.editorTemplate || process.env.TYPEBOT_EDITOR_TEMPLATE || getDefaultTypebotEditorTemplate(baseUrl),
+    editorTemplate: normalizeTypebotEditorTemplate(
+      metadata?.editorTemplate || process.env.TYPEBOT_EDITOR_TEMPLATE || getDefaultTypebotEditorTemplate(baseUrl),
+    ),
     apiUrl: metadata?.apiUrl || process.env.TYPEBOT_API_URL || getDefaultTypebotApiUrl(baseUrl),
     apiKey: integration?.apiKey || process.env.TYPEBOT_API_KEY || null,
     workspaceId: metadata?.workspaceId || process.env.TYPEBOT_WORKSPACE_ID || null,

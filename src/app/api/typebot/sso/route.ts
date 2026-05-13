@@ -9,6 +9,7 @@ import {
   createTypebot,
   getDefaultTypebotApiUrl,
   getDefaultTypebotEditorTemplate,
+  normalizeTypebotEditorTemplate,
 } from '@/server/integrations/typebot';
 import { redirectUrl } from '@/server/utils/url';
 
@@ -77,10 +78,11 @@ export async function GET(request: Request) {
   const currentMetadata = (currentIntegration?.metadata as Record<string, unknown> | null) ?? {};
   const apiUrl = (currentMetadata.apiUrl as string | undefined) || process.env.TYPEBOT_API_URL || getDefaultTypebotApiUrl(baseUrl);
   const viewerUrl = (currentMetadata.viewerUrl as string | undefined) || process.env.TYPEBOT_VIEWER_URL || null;
-  const editorTemplate =
+  const editorTemplate = normalizeTypebotEditorTemplate(
     (currentMetadata.editorTemplate as string | undefined) ||
-    process.env.TYPEBOT_EDITOR_TEMPLATE ||
-    getDefaultTypebotEditorTemplate(baseUrl);
+      process.env.TYPEBOT_EDITOR_TEMPLATE ||
+      getDefaultTypebotEditorTemplate(baseUrl),
+  );
 
   await upsertIntegration(user.agencyId, 'TYPEBOT', {
     baseUrl,

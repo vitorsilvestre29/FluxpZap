@@ -36,6 +36,10 @@ export function getDefaultTypebotEditorTemplate(baseUrl?: string | null) {
   return `${baseUrl.replace(/\/$/, '')}/typebots/{{typebotId}}`;
 }
 
+export function normalizeTypebotEditorTemplate(template: string) {
+  return template.replace(/^\/_fluxo-builder(?=\/|$)/, '/fluxo-builder');
+}
+
 export function getDefaultTypebotApiUrl(baseUrl?: string | null) {
   if (!baseUrl) return null;
   return `${baseUrl.replace(/\/$/, '')}/api/v1`;
