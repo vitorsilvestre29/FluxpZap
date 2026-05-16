@@ -192,7 +192,7 @@ export default async function FlowsPage({ searchParams }: PageProps) {
                       name="expire"
                       type="number"
                       defaultValue={flow.expire}
-                      placeholder="Expiracao em segundos"
+                      placeholder="Expirar sessao (segundos, ex: 300 = 5min)"
                       className="rounded-2xl border border-slate-800 bg-slate-950/70 px-4 py-3 text-sm text-slate-100"
                     />
                     <input
