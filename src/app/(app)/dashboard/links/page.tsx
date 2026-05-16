@@ -1,14 +1,16 @@
 import { requireUser } from '@/server/auth/context';
+import { labelStatus } from '@/lib/labels';
 import { getClients } from '@/server/data/clients';
 import { getFlows } from '@/server/data/flows';
 import { getInstances } from '@/server/data/instances';
 import { getLinks } from '@/server/data/links';
 
 type PageProps = {
-  searchParams?: { error?: string };
+  searchParams?: Promise<{ error?: string }>;
 };
 
 export default async function LinksPage({ searchParams }: PageProps) {
+  const params = await searchParams;
   const user = await requireUser();
   const agencyId = user.agencyId || '';
   const clients = agencyId ? await getClients(agencyId) : [];
@@ -19,14 +21,14 @@ export default async function LinksPage({ searchParams }: PageProps) {
   return (
     <div className="space-y-8">
       <header>
-        <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Vinculos</p>
-        <h1 className="mt-3 text-2xl font-semibold text-white">Cliente + Fluxo + Instancia</h1>
+        <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Vínculos</p>
+        <h1 className="mt-3 text-2xl font-semibold text-white">Cliente + Fluxo + Instância</h1>
       </header>
 
       <section className="panel rounded-3xl p-6">
-        {searchParams?.error && (
+        {params?.error && (
           <div className="mb-4 rounded-2xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-xs text-amber-200">
-            {searchParams.error}
+            {params.error}
           </div>
         )}
         <form action="/api/links" method="post" className="grid gap-4 md:grid-cols-3">
@@ -75,7 +77,7 @@ export default async function LinksPage({ searchParams }: PageProps) {
       <section className="grid gap-4">
         {links.length === 0 && (
           <div className="rounded-2xl border border-slate-800 bg-slate-950/60 px-4 py-4 text-sm text-slate-400">
-            Nenhum vinculo criado.
+            Nenhum vínculo criado.
           </div>
         )}
         {links.map((link) => (
@@ -90,7 +92,7 @@ export default async function LinksPage({ searchParams }: PageProps) {
             </div>
             <div className="flex flex-wrap items-center gap-3">
               <p className="text-xs uppercase tracking-[0.2em] text-slate-400">
-                {link.status} · {link.flow.provider} · {link.instance.instanceName}
+                {labelStatus(link.status)} · {link.flow.provider} · {link.instance.instanceName}
               </p>
               <form action="/api/links/deploy" method="post">
                 <input type="hidden" name="linkId" value={link.id} />

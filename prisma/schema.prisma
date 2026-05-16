@@ -191,7 +191,7 @@ model TypebotFlow {
   evolutionBotId    String?
   evolutionBotApiUrl String?
   evolutionBotApiKey String?
-  triggerType       String      @default("all")
+  triggerType       String      @default("keyword")
   triggerOperator   String?
   triggerValue      String?
   keepOpen          Boolean     @default(false)

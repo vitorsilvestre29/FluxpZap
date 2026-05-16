@@ -133,7 +133,7 @@ function buildEvolutionBotPayload(payload: EvolutionBotPayload) {
     description: payload.description || 'Fluxozap bot',
     apiUrl: payload.apiUrl,
     apiKey: payload.apiKey || '',
-    triggerType: payload.triggerType || 'all',
+    triggerType: payload.triggerType || 'keyword',
     triggerOperator: payload.triggerOperator || undefined,
     triggerValue: payload.triggerValue || undefined,
     expire: payload.expire,
@@ -198,7 +198,7 @@ function buildEvolutionTypebotPayload(payload: EvolutionTypebotPayload) {
     enabled: payload.enabled,
     url: payload.url.replace(/\/$/, ''),
     typebot: payload.typebot,
-    triggerType: payload.triggerType || 'all',
+    triggerType: payload.triggerType || 'keyword',
     triggerOperator: payload.triggerOperator || undefined,
     triggerValue: payload.triggerValue || undefined,
     expire: payload.expire,
@@ -242,7 +242,7 @@ export async function updateEvolutionTypebot(
   payload: EvolutionTypebotPayload,
 ) {
   const response = await fetch(`${config.baseUrl}/typebot/update/${evolutionTypebotId}/${instanceName}`, {
-    method: 'POST',
+    method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
       apikey: config.apiKey,

@@ -1,55 +1,47 @@
-import Link from 'next/link';
+import Link from "next/link";
 
 type PageProps = {
-  searchParams?: { error?: string; verified?: string; reset?: string };
+  searchParams?: Promise<{ error?: string; verified?: string; reset?: string }>;
 };
 
-export default function LoginPage({ searchParams }: PageProps) {
+export default async function LoginPage({ searchParams }: PageProps) {
+  const params = await searchParams;
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-7">
       <div>
-        <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Fluxozap</p>
-        <h1 className="mt-3 text-2xl font-semibold text-white">Entrar</h1>
-        <p className="mt-2 text-sm text-slate-400">Acesse sua operacao e clientes.</p>
+        <p className="eyebrow">Fluxozap Access</p>
+        <h1 className="display-title mt-4 text-5xl leading-none text-[var(--foreground)]">Entrar no cockpit</h1>
+        <p className="mt-4 max-w-sm text-sm leading-7 text-[var(--foreground-soft)]">
+          Acesse sua operação, acompanhe clientes ativos e publique fluxos sem sair do painel.
+        </p>
       </div>
 
-      {(searchParams?.error || searchParams?.verified || searchParams?.reset) && (
-        <div className="rounded-2xl border border-slate-800 bg-slate-950/60 px-4 py-3 text-sm text-slate-300">
-          {searchParams?.error && <p>{searchParams.error}</p>}
-          {searchParams?.verified && <p>Email verificado com sucesso.</p>}
-          {searchParams?.reset && <p>Senha atualizada. Faça login.</p>}
+      {(params?.error || params?.verified || params?.reset) && (
+        <div className="soft-panel rounded-[1.5rem] px-4 py-4 text-sm leading-6 text-[var(--foreground-soft)]">
+          {params?.error && <p>{params.error}</p>}
+          {params?.verified && <p>Email verificado com sucesso.</p>}
+          {params?.reset && <p>Senha atualizada. Faça login.</p>}
         </div>
       )}
 
       <form action="/api/auth/login" method="post" className="space-y-4">
-        <div>
-          <label className="text-xs uppercase tracking-[0.2em] text-slate-400">Email</label>
-          <input
-            name="email"
-            type="email"
-            required
-            className="mt-2 w-full rounded-2xl border border-slate-800 bg-slate-950/70 px-4 py-3 text-sm text-slate-100"
-          />
+        <div className="space-y-2">
+          <label className="eyebrow">Email</label>
+          <input name="email" type="email" required />
         </div>
-        <div>
-          <label className="text-xs uppercase tracking-[0.2em] text-slate-400">Senha</label>
-          <input
-            name="password"
-            type="password"
-            required
-            className="mt-2 w-full rounded-2xl border border-slate-800 bg-slate-950/70 px-4 py-3 text-sm text-slate-100"
-          />
+        <div className="space-y-2">
+          <label className="eyebrow">Senha</label>
+          <input name="password" type="password" required />
         </div>
-        <button className="w-full rounded-full bg-cyan-400 px-4 py-3 text-sm font-semibold text-slate-900">
-          Entrar
-        </button>
+        <button className="btn-primary w-full">Entrar</button>
       </form>
 
-      <div className="flex flex-col gap-2 text-sm text-slate-400">
-        <Link className="text-cyan-200" href="/auth/reset">
+      <div className="flex flex-col gap-3 text-sm text-[var(--foreground-soft)]">
+        <Link className="text-[var(--accent)]" href="/auth/reset">
           Esqueci minha senha
         </Link>
-        <Link className="text-cyan-200" href="/auth/signup">
+        <Link className="text-[var(--accent)]" href="/auth/signup">
           Criar conta
         </Link>
       </div>

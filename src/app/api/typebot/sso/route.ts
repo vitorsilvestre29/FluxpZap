@@ -34,7 +34,7 @@ export async function GET(request: Request) {
     return NextResponse.redirect(redirectUrl('/dashboard/flows?error=Fluxo%20nao%20encontrado', request));
   }
 
-  const ssoSecret = process.env.TYPEBOT_SSO_SECRET;
+  const ssoSecret = process.env.TYPEBOT_SSO_SECRET || process.env.FLUXOZAP_SSO_SECRET;
   const baseUrl = process.env.TYPEBOT_BASE_URL?.replace(/\/$/, '') || '';
   const ssoUrl = process.env.TYPEBOT_SSO_URL || (baseUrl ? `${baseUrl}/api/fluxozap/sso` : '');
 
@@ -157,7 +157,11 @@ export async function GET(request: Request) {
   const target = new URL(editorUrl, baseUrl);
   const handoffUrl = new URL('/api/fluxozap/sso', baseUrl);
   handoffUrl.searchParams.set('sessionToken', sso.sessionToken);
-  handoffUrl.searchParams.set('redirectPath', `${target.pathname}${target.search}${target.hash}`);
+  handoffUrl.searchParams.set('redirectPath', `${unmaskTypebotPath(target.pathname)}${target.search}${target.hash}`);
 
   return NextResponse.redirect(handoffUrl);
+}
+
+function unmaskTypebotPath(pathname: string) {
+  return pathname.replace(/^\/fluxo-builder(?=\/|$)/, '');
 }

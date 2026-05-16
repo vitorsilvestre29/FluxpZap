@@ -1,14 +1,17 @@
 import { requireUser } from '@/server/auth/context';
+import { labelStatus } from '@/lib/labels';
+import { ConfirmDelete } from '@/components/confirm-delete';
 import { getFlows } from '@/server/data/flows';
 import { getIntegration } from '@/server/integrations/integration.service';
 import { getTypebotConfig } from '@/server/integrations/typebot-config';
 import { buildTypebotEditorUrl, getDefaultTypebotEditorTemplate } from '@/server/integrations/typebot';
 
 type PageProps = {
-  searchParams?: { error?: string };
+  searchParams?: Promise<{ error?: string }>;
 };
 
 export default async function FlowsPage({ searchParams }: PageProps) {
+  const params = await searchParams;
   const user = await requireUser();
   const agencyId = user.agencyId || '';
   const flows = agencyId ? await getFlows(agencyId) : [];
@@ -18,7 +21,9 @@ export default async function FlowsPage({ searchParams }: PageProps) {
     typebotConfig?.editorTemplate ||
     (typebotIntegration?.metadata as { editorTemplate?: string } | null)?.editorTemplate ||
     getDefaultTypebotEditorTemplate(typebotIntegration?.baseUrl ?? process.env.TYPEBOT_BASE_URL);
-  const hasTypebotSso = Boolean(process.env.TYPEBOT_BASE_URL && process.env.TYPEBOT_SSO_SECRET);
+  const hasTypebotSso = Boolean(
+    process.env.TYPEBOT_BASE_URL && (process.env.TYPEBOT_SSO_SECRET || process.env.FLUXOZAP_SSO_SECRET),
+  );
   const hasVisualEngine = Boolean(
     hasTypebotSso ||
       ((typebotIntegration?.baseUrl || process.env.TYPEBOT_BASE_URL) &&
@@ -34,7 +39,7 @@ export default async function FlowsPage({ searchParams }: PageProps) {
           <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Fluxos</p>
           <h1 className="mt-3 text-2xl font-semibold text-white">Construtor Fluxozap</h1>
           <p className="mt-2 max-w-2xl text-sm text-slate-400">
-            Crie fluxos visuais para seus clientes sem expor ferramentas tecnicas da operacao.
+            Crie fluxos visuais para seus clientes sem expor ferramentas técnicas da operação.
           </p>
         </div>
         <span
@@ -57,12 +62,12 @@ export default async function FlowsPage({ searchParams }: PageProps) {
         </div>
         {!hasVisualEngine && (
           <div className="mt-4 rounded-2xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-xs text-amber-200">
-            Configure o motor visual em Integracoes para criar e editar fluxos dentro do Fluxozap.
+            Configure o motor visual em Integrações para criar e editar fluxos dentro do Fluxozap.
           </div>
         )}
-        {searchParams?.error && (
+        {params?.error && (
           <div className="mt-4 rounded-2xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-xs text-amber-200">
-            {searchParams.error}
+            {params.error}
           </div>
         )}
         <form action="/api/flows" method="post" className="mt-5 grid gap-4">
@@ -75,7 +80,7 @@ export default async function FlowsPage({ searchParams }: PageProps) {
           />
           <textarea
             name="description"
-            placeholder="Descricao para sua equipe"
+            placeholder="Descrição para sua equipe"
             className="rounded-2xl border border-slate-800 bg-slate-950/70 px-4 py-3 text-sm text-slate-100"
             rows={3}
           />
@@ -111,13 +116,13 @@ export default async function FlowsPage({ searchParams }: PageProps) {
               <div className="flex flex-wrap items-start justify-between gap-4">
                 <div>
                   <p className="text-sm font-semibold text-white">{flow.name}</p>
-                  <p className="mt-1 text-xs text-slate-400">{flow.description ?? 'Sem descricao'}</p>
+                  <p className="mt-1 text-xs text-slate-400">{flow.description ?? 'Sem descrição'}</p>
                   <p className="mt-2 text-xs text-slate-500">
-                    Vinculos: {flow._count.links} · {canOpenEditor ? 'Construtor pronto' : 'Aguardando motor visual'}
+                    Vínculos: {flow._count.links} · {canOpenEditor ? 'Construtor pronto' : 'Aguardando motor visual'}
                   </p>
                 </div>
                 <span className="rounded-full border border-slate-700 px-3 py-1 text-xs uppercase tracking-[0.2em] text-slate-300">
-                  {flow.status}
+                  {labelStatus(flow.status)}
                 </span>
               </div>
 
@@ -151,7 +156,7 @@ export default async function FlowsPage({ searchParams }: PageProps) {
                   name="description"
                   defaultValue={flow.description ?? ''}
                   rows={2}
-                  placeholder="Descricao"
+                  placeholder="Descrição"
                   className="md:col-span-2 rounded-2xl border border-slate-800 bg-slate-950/70 px-4 py-3 text-sm text-slate-100"
                 />
                 <details className="md:col-span-2 rounded-2xl border border-slate-800 bg-slate-950/50 p-4">
@@ -165,7 +170,7 @@ export default async function FlowsPage({ searchParams }: PageProps) {
                       <option value="all">Todas as mensagens</option>
                       <option value="keyword">Palavra-chave</option>
                       <option value="none">Manual</option>
-                      <option value="advanced">Avancado</option>
+                      <option value="advanced">Avançado</option>
                     </select>
                     <input
                       name="triggerValue"
@@ -198,7 +203,7 @@ export default async function FlowsPage({ searchParams }: PageProps) {
                     />
                     <label className="flex items-center gap-2 text-xs text-slate-300">
                       <input name="keepOpen" type="checkbox" defaultChecked={flow.keepOpen} />
-                      Manter sessao aberta
+                      Manter sessão aberta
                     </label>
                     <label className="flex items-center gap-2 text-xs text-slate-300">
                       <input name="stopBotFromMe" type="checkbox" defaultChecked={flow.stopBotFromMe} />
@@ -242,12 +247,11 @@ export default async function FlowsPage({ searchParams }: PageProps) {
                     {flow.status === 'PUBLISHED' ? 'Pausar' : 'Publicar'}
                   </button>
                 </form>
-                <form action="/api/flows/delete" method="post">
-                  <input type="hidden" name="flowId" value={flow.id} />
-                  <button className="rounded-full border border-slate-700 px-4 py-2 text-xs uppercase tracking-[0.2em] text-slate-200">
-                    Remover
-                  </button>
-                </form>
+                <ConfirmDelete
+                  action="/api/flows/delete"
+                  hiddenFields={{ flowId: flow.id }}
+                  message="Remover este fluxo? Esta ação não pode ser desfeita."
+                />
               </div>
             </article>
           );

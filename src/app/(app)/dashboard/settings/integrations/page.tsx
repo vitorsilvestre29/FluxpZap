@@ -19,8 +19,8 @@ export default async function IntegrationsPage() {
   return (
     <div className="space-y-8">
       <header>
-        <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Integracoes</p>
-        <h1 className="mt-3 text-2xl font-semibold text-white">Configuracao</h1>
+        <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Integrações</p>
+        <h1 className="mt-3 text-2xl font-semibold text-white">Configuração</h1>
       </header>
 
       <section className="panel rounded-3xl p-6">
@@ -48,7 +48,7 @@ export default async function IntegrationsPage() {
       <section className="panel rounded-3xl p-6">
         <h2 className="text-sm font-semibold text-white">Construtor de fluxos</h2>
         <p className="mt-2 text-xs text-slate-400">
-          Motor visual usado por tras do Fluxozap. Para mascarar a marca, use uma instalacao propria e deixe o template interno.
+          Motor visual usado por trás do Fluxozap. Para mascarar a marca, use uma instalação própria e deixe o template interno.
         </p>
         <form action="/api/integrations" method="post" className="mt-4 grid gap-4 md:grid-cols-2">
           <input type="hidden" name="type" value="TYPEBOT" />

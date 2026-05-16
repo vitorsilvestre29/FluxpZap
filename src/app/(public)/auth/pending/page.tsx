@@ -1,14 +1,13 @@
 export default function PendingPage() {
   return (
-    <div className="space-y-5">
-      <h1 className="text-2xl font-semibold text-white">Conta pendente</h1>
-      <p className="text-sm text-slate-400">
-        Sua conta foi criada, mas ainda precisa de aprovacao manual.
+    <div className="space-y-6">
+      <p className="eyebrow">Conta pendente</p>
+      <h1 className="display-title text-5xl leading-none text-[var(--foreground)]">Aguardando aprovacao</h1>
+      <p className="max-w-sm text-sm leading-7 text-[var(--foreground-soft)]">
+        Sua conta foi criada com sucesso e agora depende de aprovacao manual para liberar a operacao.
       </p>
       <form action="/api/auth/logout" method="post">
-        <button className="rounded-full border border-slate-700 px-4 py-2 text-xs uppercase tracking-[0.2em] text-slate-200">
-          Sair
-        </button>
+        <button className="btn-secondary">Sair</button>
       </form>
     </div>
   );

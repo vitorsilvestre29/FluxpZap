@@ -1,4 +1,5 @@
 import { requireUser } from '@/server/auth/context';
+import { labelStatus, labelRole } from '@/lib/labels';
 import { getDashboardStats, getLinks } from '@/server/data';
 
 export default async function AppHomePage() {
@@ -32,7 +33,7 @@ export default async function AppHomePage() {
           <section className="mt-10 grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
             <div className="panel rounded-3xl p-6">
               <div className="flex items-center justify-between">
-                <h2 className="text-lg font-semibold text-white">Operacao agora</h2>
+                <h2 className="text-lg font-semibold text-white">Operação agora</h2>
                 <span className="rounded-full bg-emerald-400/15 px-3 py-1 text-xs text-emerald-200">
                   Estavel
                 </span>
@@ -42,7 +43,7 @@ export default async function AppHomePage() {
                   { label: 'Clientes', value: stats.clients },
                   { label: 'WhatsApps online', value: `${stats.connectedInstances}/${stats.instances}` },
                   { label: 'Fluxos publicados', value: `${stats.publishedFlows}/${stats.flows}` },
-                  { label: 'Sessoes abertas', value: stats.openSessions },
+                  { label: 'Sessões abertas', value: stats.openSessions },
                 ].map((item) => (
                   <div key={item.label} className="rounded-2xl border border-slate-800/80 bg-slate-950/40 p-4">
                     <p className="text-xs uppercase tracking-[0.2em] text-slate-400">{item.label}</p>
@@ -51,12 +52,12 @@ export default async function AppHomePage() {
                 ))}
               </div>
               <div className="mt-6 rounded-2xl border border-dashed border-cyan-400/30 bg-cyan-400/5 px-4 py-4 text-sm text-cyan-200">
-                Bots ativos: {stats.activeLinks} · Ultimo vinculo: {links[0]?.client?.name ?? 'Nenhum ainda.'}
+                Bots ativos: {stats.activeLinks} · Último vínculo: {links[0]?.client?.name ?? 'Nenhum ainda.'}
               </div>
             </div>
 
             <div className="panel rounded-3xl p-6">
-              <h2 className="text-lg font-semibold text-white">Vinculos recentes</h2>
+              <h2 className="text-lg font-semibold text-white">Vínculos recentes</h2>
               <div className="mt-6 grid gap-4">
                 {links.length === 0 && (
                   <div className="rounded-2xl border border-slate-800/80 bg-slate-950/40 px-4 py-4 text-sm text-slate-400">
@@ -72,7 +73,7 @@ export default async function AppHomePage() {
                       <p className="text-sm text-white">{link.client.name}</p>
                       <p className="text-xs text-slate-400">{link.flow.name}</p>
                     </div>
-                    <span className="text-xs uppercase tracking-[0.2em] text-slate-300">{link.status}</span>
+                    <span className="text-xs uppercase tracking-[0.2em] text-slate-300">{labelStatus(link.status)}</span>
                   </div>
                 ))}
               </div>

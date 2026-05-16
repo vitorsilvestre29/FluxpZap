@@ -1,11 +1,14 @@
 import { requireUser } from '@/server/auth/context';
 import { getClients } from '@/server/data/clients';
+import { labelStatus } from '@/lib/labels';
+import { ConfirmDelete } from '@/components/confirm-delete';
 
 type PageProps = {
-  searchParams?: { error?: string };
+  searchParams?: Promise<{ error?: string }>;
 };
 
 export default async function ClientsPage({ searchParams }: PageProps) {
+  const params = await searchParams;
   const user = await requireUser();
   const agencyId = user.agencyId || '';
   const clients = agencyId ? await getClients(agencyId) : [];
@@ -19,9 +22,9 @@ export default async function ClientsPage({ searchParams }: PageProps) {
 
       <section className="panel rounded-3xl p-6">
         <h2 className="text-sm font-semibold text-white">Novo cliente</h2>
-        {searchParams?.error && (
+        {params?.error && (
           <div className="mt-4 rounded-2xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-xs text-amber-200">
-            {searchParams.error}
+            {params.error}
           </div>
         )}
         <form action="/api/clients" method="post" className="mt-4 grid gap-4 md:grid-cols-2">
@@ -55,7 +58,7 @@ export default async function ClientsPage({ searchParams }: PageProps) {
           />
           <textarea
             name="notes"
-            placeholder="Observacoes internas"
+            placeholder="Observações internas"
             rows={3}
             className="md:col-span-2 rounded-2xl border border-slate-800 bg-slate-950/70 px-4 py-3 text-sm text-slate-100"
           />
@@ -81,11 +84,11 @@ export default async function ClientsPage({ searchParams }: PageProps) {
                 <p className="text-sm font-semibold text-white">{client.name}</p>
                 <p className="text-xs text-slate-400">WhatsApp: {client.whatsappNumber ?? '-'}</p>
                 <p className="text-xs text-slate-500">
-                  Instancias: {client.instances.length} · Sessoes: {client._count.botSessions}
+                  Instâncias: {client.instances.length} · Sessões: {client._count.botSessions}
                 </p>
               </div>
               <span className="rounded-full border border-slate-700 px-3 py-1 text-xs uppercase tracking-[0.2em] text-slate-300">
-                {client.status}
+                {labelStatus(client.status)}
               </span>
             </div>
             <form action="/api/clients" method="post" className="grid gap-3 md:grid-cols-3">
@@ -140,12 +143,13 @@ export default async function ClientsPage({ searchParams }: PageProps) {
                 Salvar
               </button>
             </form>
-            <form action="/api/clients/delete" method="post" className="flex justify-end">
-              <input type="hidden" name="clientId" value={client.id} />
-              <button className="rounded-full border border-slate-700 px-4 py-2 text-xs uppercase tracking-[0.2em] text-slate-200">
-                Remover
-              </button>
-            </form>
+            <div className="flex justify-end">
+              <ConfirmDelete
+                action="/api/clients/delete"
+                hiddenFields={{ clientId: client.id }}
+                message="Remover este cliente? Esta ação não pode ser desfeita."
+              />
+            </div>
           </div>
         ))}
       </section>

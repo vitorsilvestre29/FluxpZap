@@ -2,10 +2,11 @@ import { requireUser } from '@/server/auth/context';
 import { getAgencyUsage } from '@/server/data/agency';
 
 type PageProps = {
-  searchParams?: { error?: string };
+  searchParams?: Promise<{ error?: string }>;
 };
 
 export default async function SettingsPage({ searchParams }: PageProps) {
+  const params = await searchParams;
   const user = await requireUser();
   const usage = user.agencyId ? await getAgencyUsage(user.agencyId) : null;
   const agency = usage?.agency;
@@ -13,13 +14,13 @@ export default async function SettingsPage({ searchParams }: PageProps) {
   return (
     <div className="space-y-8">
       <header>
-        <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Configuracoes</p>
+        <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Configurações</p>
         <h1 className="mt-3 text-2xl font-semibold text-white">Conta e white-label</h1>
       </header>
 
-      {searchParams?.error && (
+      {params?.error && (
         <div className="rounded-2xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-xs text-amber-200">
-          {searchParams.error}
+          {params.error}
         </div>
       )}
 
@@ -43,13 +44,13 @@ export default async function SettingsPage({ searchParams }: PageProps) {
           </section>
 
           <section className="panel rounded-3xl p-6">
-            <h2 className="text-sm font-semibold text-white">Dados da agencia</h2>
+            <h2 className="text-sm font-semibold text-white">Dados da agência</h2>
             <form action="/api/agency" method="post" className="mt-4 grid gap-4 md:grid-cols-2">
               <input
                 name="name"
                 required
                 defaultValue={agency.name}
-                placeholder="Nome da agencia"
+                placeholder="Nome da agência"
                 className="rounded-2xl border border-slate-800 bg-slate-950/70 px-4 py-3 text-sm text-slate-100"
               />
               <input

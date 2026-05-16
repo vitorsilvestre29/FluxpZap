@@ -2,12 +2,14 @@ import { redirect } from 'next/navigation';
 
 import { requireUser } from '@/server/auth/context';
 import { getAgencies } from '@/server/data/admin';
+import { labelStatus, labelRole } from '@/lib/labels';
 
 type PageProps = {
-  searchParams?: { error?: string };
+  searchParams?: Promise<{ error?: string }>;
 };
 
 export default async function AgenciesPage({ searchParams }: PageProps) {
+  const params = await searchParams;
   const user = await requireUser();
   if (user.role !== 'SUPER_ADMIN') {
     redirect('/dashboard');
@@ -19,21 +21,21 @@ export default async function AgenciesPage({ searchParams }: PageProps) {
     <div className="space-y-8">
       <header>
         <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Admin</p>
-        <h1 className="mt-3 text-2xl font-semibold text-white">Agencias</h1>
+        <h1 className="mt-3 text-2xl font-semibold text-white">Agências</h1>
       </header>
 
       <section className="panel rounded-3xl p-6">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
-            <h2 className="text-sm font-semibold text-white">Nova agencia</h2>
+            <h2 className="text-sm font-semibold text-white">Nova agência</h2>
             <p className="mt-1 text-sm text-slate-400">
-              Cadastre manualmente um cliente pagante e entregue o acesso inicial ao responsavel.
+              Cadastre manualmente um cliente pagante e entregue o acesso inicial ao responsável.
             </p>
           </div>
         </div>
-        {searchParams?.error && (
+        {params?.error && (
           <div className="mt-4 rounded-2xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-xs text-amber-200">
-            {searchParams.error}
+            {params.error}
           </div>
         )}
         <form action="/api/admin/agencies" method="post" className="mt-5 grid gap-4 md:grid-cols-3">
@@ -41,12 +43,12 @@ export default async function AgenciesPage({ searchParams }: PageProps) {
           <input
             name="agencyName"
             required
-            placeholder="Nome da agencia"
+            placeholder="Nome da agência"
             className="rounded-2xl border border-slate-800 bg-slate-950/70 px-4 py-3 text-sm text-slate-100"
           />
           <input
             name="ownerName"
-            placeholder="Nome do responsavel"
+            placeholder="Nome do responsável"
             className="rounded-2xl border border-slate-800 bg-slate-950/70 px-4 py-3 text-sm text-slate-100"
           />
           <input
@@ -90,7 +92,7 @@ export default async function AgenciesPage({ searchParams }: PageProps) {
             />
           </div>
           <button className="md:col-span-3 rounded-full bg-cyan-400 px-4 py-3 text-sm font-semibold text-slate-900">
-            Criar agencia
+            Criar agência
           </button>
         </form>
       </section>
@@ -105,11 +107,11 @@ export default async function AgenciesPage({ searchParams }: PageProps) {
               <p className="text-sm font-semibold text-white">{agency.name}</p>
               <p className="text-xs text-slate-400">Slug: {agency.slug}</p>
               <p className="text-xs text-slate-500">
-                Status: {agency.status} · Plano: {agency.plan} · Instancias: {agency.instances.length}/{agency.maxInstances} · Clientes: {agency.clients.length}/{agency.maxClients}
+                Status: {labelStatus(agency.status)} · Plano: {agency.plan} · Instâncias: {agency.instances.length}/{agency.maxInstances} · Clientes: {agency.clients.length}/{agency.maxClients}
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-3 text-xs text-slate-400">
-              Usuarios: {agency.users.length} | Clientes: {agency.clients.length}
+              Usuários: {agency.users.length} | Clientes: {agency.clients.length}
               <form action="/api/admin/agencies" method="post">
                 <input type="hidden" name="agencyId" value={agency.id} />
                 <input type="hidden" name="status" value={agency.status === 'ACTIVE' ? 'SUSPENDED' : 'ACTIVE'} />
@@ -153,7 +155,7 @@ export default async function AgenciesPage({ searchParams }: PageProps) {
                 {agency.users.map((agencyUser) => (
                   <div key={agencyUser.id} className="flex flex-wrap items-center justify-between gap-3 text-xs text-slate-400">
                     <span>
-                      {agencyUser.name ?? agencyUser.email} · {agencyUser.role} · {agencyUser.status}
+                      {agencyUser.name ?? agencyUser.email} · {labelRole(agencyUser.role)} · {labelStatus(agencyUser.status)}
                     </span>
                     <form action="/api/admin/agencies" method="post">
                       <input type="hidden" name="userId" value={agencyUser.id} />

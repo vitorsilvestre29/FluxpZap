@@ -5,10 +5,11 @@ import { getClients } from '@/server/data/clients';
 import { getInstances } from '@/server/data/instances';
 
 type PageProps = {
-  searchParams?: { error?: string };
+  searchParams?: Promise<{ error?: string }>;
 };
 
 export default async function InstancesPage({ searchParams }: PageProps) {
+  const params = await searchParams;
   const user = await requireUser();
   const agencyId = user.agencyId || '';
   const instances = agencyId ? await getInstances(agencyId) : [];
@@ -18,15 +19,15 @@ export default async function InstancesPage({ searchParams }: PageProps) {
   return (
     <div className="space-y-8">
       <header>
-        <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Instancias</p>
+        <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Instâncias</p>
         <h1 className="mt-3 text-2xl font-semibold text-white">WhatsApp</h1>
       </header>
 
       <section className="panel rounded-3xl p-6">
         <h2 className="text-sm font-semibold text-white">Nova instancia</h2>
-        {searchParams?.error && (
+        {params?.error && (
           <div className="mt-4 rounded-2xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-xs text-amber-200">
-            {searchParams.error}
+            {params.error}
           </div>
         )}
         <form action="/api/instances" method="post" className="mt-4 grid gap-4 md:grid-cols-2">

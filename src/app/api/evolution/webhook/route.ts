@@ -10,6 +10,15 @@ export async function POST(request: Request) {
   }
 
   const body = await request.json();
+
+  // Only process actual incoming message events — ignore connection, QR, send, etc.
+  const event = body?.event ?? body?.type ?? '';
+  const isMessageEvent =
+    !event || event === 'MESSAGES_UPSERT' || event === 'messages.upsert';
+  if (!isMessageEvent) {
+    return NextResponse.json({ ok: true, ignored: true });
+  }
+
   const instanceName =
     body?.instance ||
     body?.instanceName ||

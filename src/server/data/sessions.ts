@@ -3,7 +3,7 @@ import { Prisma } from '@prisma/client';
 import { prisma } from '@/server/db/prisma';
 
 export async function getBotSessions(agencyId: string) {
-  return prisma.botSession.findMany({
+  const sessions = await prisma.botSession.findMany({
     where: { agencyId },
     include: {
       client: true,
@@ -17,6 +17,30 @@ export async function getBotSessions(agencyId: string) {
     orderBy: { updatedAt: 'desc' },
     take: 50,
   });
+
+  // Auto-close sessions that exceeded their flow's expire time
+  const now = Date.now();
+  const expiredIds: string[] = [];
+  for (const s of sessions) {
+    if (s.status !== 'OPEN') continue;
+    const expireSecs = s.link?.flow?.expire ?? 300;
+    const lastActivity = s.lastMessageAt ?? s.createdAt;
+    if (now - lastActivity.getTime() > expireSecs * 1000) {
+      expiredIds.push(s.id);
+    }
+  }
+
+  if (expiredIds.length > 0) {
+    await prisma.botSession.updateMany({
+      where: { id: { in: expiredIds } },
+      data: { status: 'CLOSED' },
+    });
+    for (const s of sessions) {
+      if (expiredIds.includes(s.id)) s.status = 'CLOSED';
+    }
+  }
+
+  return sessions;
 }
 
 export async function upsertBotSession(data: {

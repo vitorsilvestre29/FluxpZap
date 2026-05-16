@@ -15,7 +15,7 @@ export default async function ApprovalsPage() {
     <div className="space-y-8">
       <header>
         <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Admin</p>
-        <h1 className="mt-3 text-2xl font-semibold text-white">Aprovacoes</h1>
+        <h1 className="mt-3 text-2xl font-semibold text-white">Aprovações</h1>
       </header>
 
       <div className="grid gap-4">
@@ -32,7 +32,7 @@ export default async function ApprovalsPage() {
             <div>
               <p className="text-sm font-semibold text-white">{user.name ?? user.email}</p>
               <p className="text-xs text-slate-400">{user.email}</p>
-              <p className="text-xs text-slate-500">Agencia: {user.agency?.name ?? '-'}</p>
+              <p className="text-xs text-slate-500">Agência: {user.agency?.name ?? '-'}</p>
             </div>
             <form action="/api/admin/approvals" method="post">
               <input type="hidden" name="userId" value={user.id} />

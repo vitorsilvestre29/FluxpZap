@@ -5,20 +5,21 @@ import { requireUser } from '@/server/auth/context';
 import { prisma } from '@/server/db/prisma';
 
 type PageProps = {
-  params: { flowId: string };
+  params: Promise<{ flowId: string }>;
 };
 
 export default async function FlowEditorPage({ params }: PageProps) {
+  const { flowId } = await params;
   const user = await requireUser();
   if (!user.agencyId) return notFound();
 
   const flow = await prisma.typebotFlow.findFirst({
-    where: { id: params.flowId, agencyId: user.agencyId },
+    where: { id: flowId, agencyId: user.agencyId },
   });
 
   if (!flow) return notFound();
 
-  const canOpenEditor = Boolean(flow.typebotId || process.env.TYPEBOT_SSO_SECRET);
+  const canOpenEditor = Boolean(flow.typebotId || process.env.TYPEBOT_SSO_SECRET || process.env.FLUXOZAP_SSO_SECRET);
 
   if (!canOpenEditor) {
     return (

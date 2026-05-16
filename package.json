@@ -12,13 +12,15 @@
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
     "db:studio": "prisma studio",
-    "admin:create": "node scripts/create-super-admin.mjs"
+    "admin:create": "node scripts/create-super-admin.mjs",
+    "validate:sale": "npx tsx scripts/validate-e2e.ts"
   },
   "dependencies": {
     "@prisma/client": "^6.16.1",
     "bcryptjs": "^3.0.2",
     "jose": "^5.2.4",
     "next": "16.2.6",
+    "nodemailer": "^8.0.7",
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "zod": "^3.24.2"
@@ -26,6 +28,7 @@
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
+    "@types/nodemailer": "^8.0.0",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
