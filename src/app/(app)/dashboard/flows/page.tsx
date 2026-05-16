@@ -1,5 +1,5 @@
 import { requireUser } from '@/server/auth/context';
-import { labelStatus } from '@/lib/labels';
+import { labelStatus, statusColor } from '@/lib/labels';
 import { ConfirmDelete } from '@/components/confirm-delete';
 import { getFlows } from '@/server/data/flows';
 import { getIntegration } from '@/server/integrations/integration.service';
@@ -121,7 +121,7 @@ export default async function FlowsPage({ searchParams }: PageProps) {
                     Vínculos: {flow._count.links} · {canOpenEditor ? 'Construtor pronto' : 'Aguardando motor visual'}
                   </p>
                 </div>
-                <span className="rounded-full border border-slate-700 px-3 py-1 text-xs uppercase tracking-[0.2em] text-slate-300">
+                <span className={`rounded-full border px-3 py-1 text-xs uppercase tracking-[0.2em] ${statusColor(flow.status)}`}>
                   {labelStatus(flow.status)}
                 </span>
               </div>

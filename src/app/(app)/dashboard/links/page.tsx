@@ -61,7 +61,7 @@ export default async function LinksPage({ searchParams }: PageProps) {
             required
             className="rounded-2xl border border-slate-800 bg-slate-950/70 px-4 py-3 text-sm text-slate-100"
           >
-            <option value="">Instancia</option>
+            <option value="">Instância</option>
             {instances.map((instance) => (
               <option key={instance.id} value={instance.id}>
                 {instance.client.name} · {instance.instanceName}
@@ -88,7 +88,7 @@ export default async function LinksPage({ searchParams }: PageProps) {
             <div>
               <p className="text-sm font-semibold text-white">{link.client.name}</p>
               <p className="text-xs text-slate-400">{link.flow.name}</p>
-              <p className="text-xs text-slate-500">Sessoes: {link._count.sessions}</p>
+              <p className="text-xs text-slate-500">Sessões: {link._count.sessions}</p>
             </div>
             <div className="flex flex-wrap items-center gap-3">
               <p className="text-xs uppercase tracking-[0.2em] text-slate-400">

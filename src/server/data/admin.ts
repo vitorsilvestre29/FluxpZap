@@ -68,7 +68,7 @@ export async function createAgencyWithOwner(data: {
   const agency = await prisma.agency.create({
     data: {
       name: data.agencyName,
-      slug: `${slugify(data.agencyName)}-${Date.now()}`,
+      slug: `${slugify(data.agencyName)}-${Math.random().toString(36).slice(2, 7)}`,
       plan: data.plan,
       maxClients: data.maxClients,
       maxInstances: data.maxInstances,

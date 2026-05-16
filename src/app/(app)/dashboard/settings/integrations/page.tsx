@@ -16,6 +16,9 @@ export default async function IntegrationsPage() {
     | { apiUrl?: string; workspaceId?: string; viewerUrl?: string }
     | null;
 
+  const evolutionKeySet = Boolean(evolution?.apiKey || process.env.EVOLUTION_API_KEY);
+  const typebotKeySet = Boolean(typebot?.apiKey || process.env.TYPEBOT_API_KEY);
+
   return (
     <div className="space-y-8">
       <header>
@@ -30,15 +33,23 @@ export default async function IntegrationsPage() {
           <input
             name="baseUrl"
             defaultValue={evolution?.baseUrl ?? process.env.EVOLUTION_BASE_URL ?? ''}
-            placeholder="Base URL"
+            placeholder="Base URL (ex: https://evolution.seudominio.com)"
             className="rounded-2xl border border-slate-800 bg-slate-950/70 px-4 py-3 text-sm text-slate-100"
           />
-          <input
-            name="apiKey"
-            defaultValue={evolution?.apiKey ?? process.env.EVOLUTION_API_KEY ?? ''}
-            placeholder="API Key"
-            className="rounded-2xl border border-slate-800 bg-slate-950/70 px-4 py-3 text-sm text-slate-100"
-          />
+          <div className="relative">
+            <input
+              name="apiKey"
+              type="password"
+              placeholder={evolutionKeySet ? '••••••••  (deixe em branco para manter)' : 'API Key'}
+              autoComplete="new-password"
+              className="w-full rounded-2xl border border-slate-800 bg-slate-950/70 px-4 py-3 text-sm text-slate-100"
+            />
+            {evolutionKeySet && (
+              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs text-emerald-400">
+                ✓ configurada
+              </span>
+            )}
+          </div>
           <button className="md:col-span-2 rounded-full bg-cyan-400 px-4 py-3 text-sm font-semibold text-slate-900">
             Salvar Evolution
           </button>
@@ -58,12 +69,20 @@ export default async function IntegrationsPage() {
             placeholder="URL do motor de fluxos"
             className="rounded-2xl border border-slate-800 bg-slate-950/70 px-4 py-3 text-sm text-slate-100"
           />
-          <input
-            name="apiKey"
-            defaultValue={typebot?.apiKey ?? process.env.TYPEBOT_API_KEY ?? ''}
-            placeholder="Chave interna do construtor"
-            className="rounded-2xl border border-slate-800 bg-slate-950/70 px-4 py-3 text-sm text-slate-100"
-          />
+          <div className="relative">
+            <input
+              name="apiKey"
+              type="password"
+              placeholder={typebotKeySet ? '••••••••  (deixe em branco para manter)' : 'Chave interna do construtor'}
+              autoComplete="new-password"
+              className="w-full rounded-2xl border border-slate-800 bg-slate-950/70 px-4 py-3 text-sm text-slate-100"
+            />
+            {typebotKeySet && (
+              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs text-emerald-400">
+                ✓ configurada
+              </span>
+            )}
+          </div>
           <input
             name="workspaceId"
             defaultValue={typebotMetadata?.workspaceId ?? process.env.TYPEBOT_WORKSPACE_ID ?? ''}
@@ -84,7 +103,7 @@ export default async function IntegrationsPage() {
           <input
             name="viewerUrl"
             defaultValue={typebotMetadata?.viewerUrl ?? process.env.TYPEBOT_VIEWER_URL ?? ''}
-            placeholder="URL publica dos bots"
+            placeholder="URL pública dos bots"
             className="rounded-2xl border border-slate-800 bg-slate-950/70 px-4 py-3 text-sm text-slate-100"
           />
           <input

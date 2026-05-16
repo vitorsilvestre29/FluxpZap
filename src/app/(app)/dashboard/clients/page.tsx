@@ -1,6 +1,6 @@
 import { requireUser } from '@/server/auth/context';
 import { getClients } from '@/server/data/clients';
-import { labelStatus } from '@/lib/labels';
+import { labelStatus, statusColor } from '@/lib/labels';
 import { ConfirmDelete } from '@/components/confirm-delete';
 
 type PageProps = {
@@ -87,7 +87,7 @@ export default async function ClientsPage({ searchParams }: PageProps) {
                   Instâncias: {client.instances.length} · Sessões: {client._count.botSessions}
                 </p>
               </div>
-              <span className="rounded-full border border-slate-700 px-3 py-1 text-xs uppercase tracking-[0.2em] text-slate-300">
+              <span className={`rounded-full border px-3 py-1 text-xs uppercase tracking-[0.2em] ${statusColor(client.status)}`}>
                 {labelStatus(client.status)}
               </span>
             </div>

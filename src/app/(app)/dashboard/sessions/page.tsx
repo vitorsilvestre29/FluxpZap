@@ -1,5 +1,5 @@
 import { requireUser } from '@/server/auth/context';
-import { labelStatus } from '@/lib/labels';
+import { labelStatus, statusColor } from '@/lib/labels';
 import { getBotSessions } from '@/server/data/sessions';
 
 export default async function SessionsPage() {
@@ -35,7 +35,7 @@ export default async function SessionsPage() {
                 {session.lastMessageAt ? session.lastMessageAt.toLocaleString('pt-BR') : '-'}
               </p>
             </div>
-            <span className="h-fit rounded-full border border-slate-700 px-3 py-1 text-xs uppercase tracking-[0.2em] text-slate-300">
+            <span className={`h-fit rounded-full border px-3 py-1 text-xs uppercase tracking-[0.2em] ${statusColor(session.status)}`}>
               {labelStatus(session.status)}
             </span>
           </div>
