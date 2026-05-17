@@ -101,7 +101,7 @@ export async function updateFlow(
       keepOpen: data.keepOpen ?? false,
       stopBotFromMe: data.stopBotFromMe ?? true,
       listeningFromMe: data.listeningFromMe ?? false,
-      debounceTime: data.debounceTime ?? 1,
+      debounceTime: data.debounceTime ?? 10,
       delayMessage: data.delayMessage ?? 1000,
       unknownMessage: data.unknownMessage ?? '',
       keywordFinish: data.keywordFinish || '#sair',
